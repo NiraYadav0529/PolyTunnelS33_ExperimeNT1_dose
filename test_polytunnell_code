@@ -1,0 +1,310 @@
+## load libraries
+library(tidyverse)
+library(car)
+library(emmeans)
+library(ggplot2)
+setwd("//ad.uws.edu.au/dfshare/HomesBLK$/90958427/My Documents/Niraj Pot Experiment/Modified Data File")
+
+xrf<- read.csv("Pot_ExP_Data_For_ph_ec_soil.csv")
+head(xrf)
+library(ggplot2)
+# Check the scope of 'Plant.type' variable within ggplot
+# Make sure it's included in the aes() function
+# and that it's correctly spelled and formatted
+#ph and EC
+ggplot(xrf, aes(x = Dose, y = Na._.ppm..2, colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+
+ggplot(xrf, aes(x = Dose, y = apH_First.7th , colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+# Fit the model after ensuring the 'Plant.type' variable is present
+m1 <- lm(apH_First.7th ~ Dose * Plant.type , data = xrf)
+summary(m1)
+
+
+head(xrf)
+library(ggplot2)
+#Roots data
+
+ggplot(xrf, aes(x = Dose, y = Al_.ppm., colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+#ph and EC
+ggplot(xrf, aes(x = Dose, colour = Dose)) + 
+  geom_boxplot(aes(y = apH_beforefertilization), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = apH_First.7th), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type)
+
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = apH_beforefertilization, fill = "Before Fertilization"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = apH_First.7th, fill = "First 7th"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("Before Fertilization" = "blue", "First 7th" = "green")) +
+  theme(legend.position = "bottom") + theme_minimal()
+
+m1 <- lm(apH_beforefertilization ~ Dose * Plant.type, data = xrf)
+summary(m1)
+# check residuals to see if transformation needed
+# Get residuals
+res <- residuals(m1)
+# Check the distribution of residuals
+hist(res)
+# Check QQ plot using base R functions
+qqnorm(residuals(m1))
+qqline(residuals(m1))
+# Test significance
+anova(m1)
+install.packages("emmeans")
+library(emmeans)
+# Get estimated marginal means (EMMs) and pairwise comparisons
+m1.emm <- emmeans(m1, ~ Dose | Plant.type)
+# Pairwise comparisons
+pairwise <- pairs(m1.emm)
+# Show results
+pairwise
+# comparing means by dose within plant type (ignores sample.identity)
+m1.emm <- emmeans(m1, ~ Dose | Plant.type)
+multcomp::cld(m1.emm)
+
+
+#Soil pH RESPONSE WITH BASE CATIONS(ca, mg , k , Na and AND NON BASE CATIONS al, mn , zn, Fe.. 
+
+# Load necessary libraries
+library(ggplot2)
+library(emmeans)
+
+# Fit linear regression model
+model <- lm(apH_First.7th ~ Ca_.ppm. + Mg_..ppm. + K_.ppm. + Na._.ppm. + Al_.ppm. + Mn_.ppm. + Zn_.ppm. + Fe_.ppm., data = xrf)
+
+# Summary of the model
+summary(model)
+
+# Check residuals
+res <- residuals(model)
+hist(res)
+qqnorm(res)
+qqline(res)
+
+# Test significance
+anova(model)
+
+# Get estimated marginal means (EMMs) and pairwise comparisons
+m1.emm <- emmeans(model, pairwise ~ Ca_.ppm. + Mg_..ppm. + K_.ppm. + Na._.ppm. + Al_.ppm. + Mn_.ppm. + Zn_.ppm. + Fe_.ppm.)
+pairwise <- pairs(m1.emm)
+pairwise
+
+# Plot the relationships between Soil pH and cations
+ggplot(xrf, aes(x = Ca_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Ca (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Ca")
+
+ggplot(xrf, aes(x = Mg_..ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Mg (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Mg")
+
+ggplot(xrf, aes(x = K_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "K (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and K")
+
+ggplot(xrf, aes(x = Na._.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Na (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Na")
+
+ggplot(xrf, aes(x = Al_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Al (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Al")
+
+ggplot(xrf, aes(x = Mn_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Mn (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Mn")
+
+ggplot(xrf, aes(x = Zn_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Zn (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Zn")
+
+ggplot(xrf, aes(x = Fe_.ppm., y = apH_First.7th)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(x = "Fe (ppm)", y = "Soil pH (apH_First.7th)", title = "Relationship between Soil pH and Fe")
+
+
+library(ggplot2)
+#Plants Biomass data 
+head(xrf)
+ggplot(xrf, aes(x = Dose, colour = Dose)) + 
+  geom_boxplot(aes(y = dFresh.biomass_Firstclip), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = dDry.biomass_firstclip), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type)
+
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = Shoot.Biomass_harvestday.Fresh, fill = "Before Fertilization"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = Shoot.Biomass_harvestday.dry, fill = "First 7th"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("Fresh Biomass Harvest Day" = "blue", "Dry Biomass Harvest" = "green")) +
+  theme(legend.position = "bottom")
+
+
+
+# For the first plot
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = Shoot.Biomass_harvestday.Fresh, fill = "Fresh on HD"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = Shoot.Biomass_harvestday.dry, fill = "Dry on HD"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("Fresh on HD" = "blue", "Dry on HD" = "green")) +
+  labs(title = "Shoot Biomass at Harvest Day", x = "Dose", y = "Shoot Biomass in gm") +
+  theme(legend.position = "right")
+
+#For root biomass
+
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = Shoot.Biomass_harvestday.Fresh, fill = "Fresh on HD"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = Root.Biomass_harvestday.dry, fill = "Dry on HD"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("Fresh on HD" = "blue", "Dry on HD" = "green")) +
+  labs(title = "Root Biomass at Harvest Day", x = "Dose", y = "Root Biomass in gm") +
+  theme(legend.position = "right")
+
+
+
+# For the second plot
+ggplot(xrf, aes(x = Dose, colour = Dose)) + 
+  geom_boxplot(aes(y = dFresh.biomass_Firstclip, fill = "FreshBIOMASS  BF"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = dDry.biomass_firstclip,fill = "DryBIOMASS  BF"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("FreshBIOMASS ON BF" = "Black", "DryBIOMASS ON BF" ="Yellow")) +
+  labs(title = "Before Fertilization Biomass", x = "Dose", y = "Shoot biomass in gm") +
+  theme(legend.position = "right")
+
+
+
+
+ggplot(xrf, aes(x = Dose, colour = Dose)) + 
+  geom_boxplot(aes(y = dFresh.biomass_Secondclip, fill = "FreshBIOMASS before 2ND F"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = dDry.biomass_Secondclip,fill = "DryBIOMASS before 2ND F"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("FreshBIOMASS Beore 2nd F" =  "blue", "Dry before 2nd F" = "green")) +
+  labs(title = "Before Fertilization Biomass", x = "Dose", y = "Shoot biomass in gm") +
+  theme(legend.position = "right")
+
+
+# For the second plot
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = dFresh.biomass_Firstclip, fill = "FreshBIOMASS  BF"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = dDry.biomass_firstclip, fill = "DryBIOMASS  BF"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("FreshBIOMASS  BF" = "black", "DryBIOMASS  BF" = "yellow")) +
+  labs(title = "Before Fertilization Biomass", x = "Dose", y = "Shoot biomass in gm") +
+  theme(legend.position = "right")
+
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = dFresh.biomass_Secondclip, fill = "FreshBIOMASS before 2ND F"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = dDry.biomass_Secondclip, fill = "DryBIOMASS before 2ND F"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("FreshBIOMASS before 2ND F" = "blue", "DryBIOMASS before 2ND F" = "green")) +
+  labs(title = "Before  2ND Fertilization Biomass", x = "Dose", y = "Shoot biomass in gm") +
+  theme(legend.position = "right")
+
+
+
+
+
+#aMMONIUMAND NITRATE LEAHCATES 
+
+ggplot(xrf, aes(x = Dose, y = jAmmonia_Second.Lechates_Before.first.fertilization, colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+m1 <- lm(jAmmonia_Second.Lechates_Before.first.fertilization ~ Dose * Plant.type , data = xrf)
+summary(m1)
+aov(m1)
+ggplot(xrf, aes(x = Dose, y = kNitrate_Second.Lechates_Before.first.fertilization, colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+m1 <- lm(kNitrate_Second.Lechates_Before.first.fertilization ~ Dose * Plant.type , data = xrf)
+summary(m1)
+ggplot(xrf, aes(x = Dose, y = lPhosphate_Second.Lechates_Before.first.fertilization, colour = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type)
+m1 <- lm(lPhosphate_Second.Lechates_Before.first.fertilization ~ Dose * Plant.type , data = xrf)
+summary(m1)
+
+library(ggplot2)
+#Ph for second fertilization before and after 
+
+ggplot(xrf, aes(x = Dose, colour = Dose)) + 
+  geom_boxplot(aes(y = epH_before_Secondfertilization), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = pH.Harvest.day), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type)
+
+ggplot(xrf, aes(x = Dose)) + 
+  geom_boxplot(aes(y = epH_before_Secondfertilization, fill = "Before second Fertilization"), position = position_dodge(width = 0.75)) +
+  geom_boxplot(aes(y = pH.Harvest.day, fill = "Harvest Day"), position = position_dodge(width = 0.75)) +
+  facet_wrap(~Plant.type) +
+  scale_fill_manual(values = c("Before second Fertilization" = "blue", "pH.Harvest.day" = "green")) +
+  theme(legend.position = "bottom")
+ 
+
+# Load necessary packages
+library(car)
+install.packages("emmeans")
+library(emmeans)
+# This will also load the 'lmerTest' package which is required by 'emmeans'
+install.packages("multcomp") 
+# Install if not installed
+library(multcomp)
+
+# Plot residuals
+residualPlot(m1)
+
+# QQ plot
+qqPlot(m1)
+Anova(m1)
+# Test significance
+Anova(m1)
+
+# Comparing means by dose within species
+m1.emm <- emmeans(m1, ~ Dose |Plant.type)
+multcomp::cld(m1.emm)
+
+residualPlot(m1)
+qqPlot(m1)
+# test significance
+Anova(m1)
+# comparing means by dose within species (ignores sample.identity)
+m1.emm <- emmeans(m1, ~ Dose | species)
+multcomp::cld(m1.emm)
+
+par(mfrow=c(1,2))
+plot(m1)
+residualPlot(m1)
+qqPlot(m1)
+aov1<- aov(P_.ppm. ~ Dose * Plant.type , data = xrf)
+summary(aov1)
+TukeyHSD(aov1)
+## plot P data by species, tissue and treatment
+ggplot(xrf, aes(x=sample.identity, y=P_.ppm., colour=Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~species)
+
+## fit model and compare treatments
+# fit model
+m1 <- lm(P_.ppm. ~ Dose * species * sample.identity, data=xrf)
+# check residuals to see if transformation needed
+residualPlot(m1)
+qqPlot(m1)
+# test significance
+Anova(m1)
+# comparing means by dose within species (ignores sample.identity)
+m1.emm <- emmeans(m1, ~ Dose | species)
+multcomp::cld(m1.emm)
+
+
+
