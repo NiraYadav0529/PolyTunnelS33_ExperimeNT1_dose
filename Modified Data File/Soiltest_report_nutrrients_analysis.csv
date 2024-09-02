@@ -1,0 +1,56 @@
+,,,Experiment 1 soil ,,Experiment 2 soil
+,,,Soil HIE,Soil HFE Paddock,
+S.no,Parameter,Methods of analysis,Value ,,
+1,Soluble Calcium (mg/kg),,506,,202.295
+2,Soluble Magnesium (mg/kg),,95,,38.124
+3,Soluble Potassium (mg/kg),,193,,90.505
+4,Soluble Phosphorus (mg/kg),,24,,1.59
+5,Phosphorus (mg/kg P),**Rayment & Lyons 2011 - 9E2 (Bray 1),189,18,6.51
+,,**Rayment & Lyons 2011 - 9B2 (Colwell),153,,20.992
+,,**Inhouse S3A (Bray 2),465,,8.1
+6,Nitrate Nitrogen (mg/kg N),,25,,4.7
+7,Ammonium Nitrogen (mg/kg N),**Inhouse S37 (KCl),1.7,,3.5428
+8,Sulfur (mg/kg S),,5.2,,23.09
+9,pH,Rayment & Lyons 2011 - 4A1 (1:5 Water),6.31,5.58,6.06
+10,Electrical Conductivity (dS/m),Rayment & Lyons 2011 - 3A1 (1:5 Water),0.086,0.039,0.033
+11,Estimated Organic Matter (% OM),**Calculation: Total Carbon x 1.75,3.6,0.85,1.69225
+12,Exchangeable Calcium,(cmol+/kg) ,4.2,0.72,1.248053892
+,,(kg/ha),1884,325,560.2464
+,Rayment & Lyons 2011 - 15D3 (Ammonium Acetate),(mg/kg),841,145,250.11
+13,Exchangeable Magnesium,(cmol+/kg) ,0.85,0.08,0.375833128
+,,(kg/ha),232,23,102.312
+,,(mg/kg),104,10,45.675
+14,Exchangeable Potassium,(cmol+/kg) ,0.5,0.6,0.317164561
+,,(kg/ha),434,62,277.7712
+,,(mg/kg),194,25,124.005
+15,Exchangeable Sodium,(cmol+/kg) ,0.0065,0.035,0.035
+,,(kg/ha),33,16,16
+,,(mg/kg),15,7.5,7.5
+16,Exchangeable Aluminium,(cmol+/kg) ,0.02,0.1,0.021014009
+,,(kg/ha),4.8,20,4.236424283
+,,(mg/kg),2.2,8.8,1.891260841
+17,Exchangeable Hydrogen,(cmol+/kg) ,0.01,0.03,0.076546941
+,,(kg/ha),1,0.5,1.714651482
+,,(mg/kg),1,0.5,0.5
+18,"Effective Cation Exchange Capacity
+(ECEC) (cmol+/kg)",(mg/kg),5.6,1,2.064873949
+19,Calcium (%),,75,70,60.44213463
+20,Magnesium (%),,15,8.2,18.20126249
+21,Potassium (%),**Base Saturation Calculations - Cation cmol+/kg / ECEC x 100,8.8,4.5,15.35999623
+22,Sodium - ESP (%),,0.94,4.7,1.271817005
+23,Aluminium (%),,0.43,9.5,1.017689692
+24,Hydrogen (%),,0.03,2.7,3.70709995
+25,Calcium/Magnesium Ratio,,4.9,8.6,3.320766054
+26,Zinc (mg/kg) ,Rayment & Lyons 2011 - 12A1 (DTPA),12,0.49,1.577
+27,Manganese (mg/kg) ,Rayment & Lyons 2011 - 12A1 (DTPA),24,,40.9564
+28,Iron (mg/kg),Rayment & Lyons 2011 - 12A1 (DTPA),83,,56.1792
+29,Copper (mg/kg),Rayment & Lyons 2011 - 12A1 (DTPA),7.6,,0.8968
+30,Boron (mg/kg),**Rayment & Lyons 2011 - 12C2 (Hot CaCl2),0.35,,0.286
+31,Silicon (mg/kg Si),**Inhouse S11 (Hot CaCl2),26,,9.35
+32,Total Carbon (%),Inhouse S4a (LECO Trumac Analyser),2.1,0.49,0.967
+33,Total Nitrogen (%),Inhouse S4a (LECO Trumac Analyser),0.1,0.04,0.0843
+34,Carbon/Nitrogen Ratio,**Calculation: Total Carbon/Total Nitrogen,20,12,11.47093713
+35,Basic Texture,**Inhouse S65,Loam ,clay loam,Clay Loam
+36,Basic Colour,**Inhouse S65,brownish,brownish ,Brownish
+37,Chloride Estimate (equiv. mg/kg),**Calculation: Electrical Conductivity x 640,55,25,21.12
+38,Organic Carbon (%),**Rayment & Lyons 2011 - 6A1 (Walkley & Black),,,0.699316982

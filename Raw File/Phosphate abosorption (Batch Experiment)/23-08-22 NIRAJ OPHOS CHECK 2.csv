@@ -1,0 +1,21 @@
+Sample ID,Sample Details,Test Name,Result,Units,Absorbance,Time,Manual Dil,Auto Dil
+C C V,,o-Phos 1,  0.504,mg P/L,0.168915,Mon Aug 21 17:37:19 2023,1,1
+C C B ,,o-Phos 1, -0.002,mg P/L,0.003730,Mon Aug 21 17:38:15 2023,1,1
+HK71,,o-Phos 1,  5.996,mg P/L,0.219658,Mon Aug 21 18:27:29 2023,1,9.09
+HK710,,o-Phos 1, 17.955,mg P/L,0.649010,Mon Aug 21 18:28:22 2023,1,9.09
+HU71,,o-Phos 1,  9.393,mg P/L,0.341631,Mon Aug 21 18:29:15 2023,1,9.09
+HU710,,o-Phos 1, 11.046,mg P/L,0.400974,Mon Aug 21 18:30:08 2023,1,9.09
+PK71,,o-Phos 1,  0.128,mg P/L,0.046300,Mon Aug 21 17:42:50 2023,1,1
+PK710,,o-Phos 1,  0.320,mg P/L,0.108742,Mon Aug 21 17:43:43 2023,1,1
+PU71,,o-Phos 1,  0.112,mg P/L,0.041101,Mon Aug 21 17:44:36 2023,1,1
+PU710,,o-Phos 1,  0.229,mg P/L,0.079079,Mon Aug 21 17:45:29 2023,1,1
+C C V,,o-Phos 1,  0.508,mg P/L,0.170049,Mon Aug 21 17:46:22 2023,1,1
+C C B ,,o-Phos 1, -0.001,mg P/L,0.004228,Mon Aug 21 17:47:16 2023,1,1
+CCV,,o-Phos 1,  0.493,mg P/L,0.165340,Mon Aug 21 18:03:22 2023,1,1
+CCB,,o-Phos 1, -0.001,mg P/L,0.003966,Mon Aug 21 18:04:15 2023,1,1
+CCV,,o-Phos 1,  0.499,mg P/L,0.167109,Mon Aug 21 18:08:41 2023,1,1
+CCB,,o-Phos 1, -0.001,mg P/L,0.004203,Mon Aug 21 18:09:34 2023,1,1
+CCV,,o-Phos 1,  0.502,mg P/L,0.168119,Mon Aug 21 18:25:42 2023,1,1
+CCB,,o-Phos 1, -0.001,mg P/L,0.003999,Mon Aug 21 18:26:35 2023,1,1
+CCV,,o-Phos 1,  0.505,mg P/L,0.169134,Mon Aug 21 18:31:01 2023,1,1
+CCB,,o-Phos 1, -0.000,mg P/L,0.004243,Mon Aug 21 18:31:55 2023,1,1
