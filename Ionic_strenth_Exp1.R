@@ -1,8 +1,6 @@
 View(Ionic_strength_EXP1)
 read.csv(Ionic_strength_EXP1.csv)
-setwd:("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/Niraj Pot Experiment/Modified Data File")
-list.files()
+
 setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
 list.files()
 
@@ -11,17 +9,6 @@ Ionic_Strength <- read.csv("Ionic_strength_EXP1.csv")
 
 # View the first few rows of the dataset
 head(Ionic_Strength)
-
-
-# Load necessary libraries
-library(ggplot2)
-
-# Visualize the distribution of Ionic Strength by Treatment
-ggplot(Ionic_Strength, aes(x = Treatment, y = Ionic.strength, fill = Treatment)) + 
-  geom_boxplot() +
-  labs(title = "Ionic Strength Across Treatments", x = "Treatment", y = "Ionic Strength (mol/L)") +
-  theme_minimal()
-
 
 # Load necessary libraries
 library(ggplot2)

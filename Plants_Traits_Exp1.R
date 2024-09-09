@@ -12,12 +12,6 @@ Plant_traits <-read.csv("Biomass_height_stem_data_exp1.csv")
 head(Plant_traits)
 colnames(Plant_traits)
 
-
-
-
-
-
-
 # Analysis for Plant Height Before Fertilization
 ggplot(Plant_traits, aes(x = Dose, y = Plant_Height_BF..cm., colour = Dose)) + 
   geom_boxplot() + 
@@ -258,26 +252,276 @@ print(cor_matrix_pearson)
 # print("Spearman Correlation Matrix:")
 # print(cor_matrix_spearman)
 
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(agricolae)
+
+# Subset the dataset for shoot biomass analysis
+shoot_biomass <- Plant_traits %>%
+  select(Dose, Plant.type, Fresh.Biomass_harvestday..gm.)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+shoot_summary <- shoot_biomass %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Shoot = mean(Fresh.Biomass_harvestday..gm., na.rm = TRUE),
+    SE_Shoot = sd(Fresh.Biomass_harvestday..gm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Shoot Biomass
+anova_shoot <- aov(Fresh.Biomass_harvestday..gm. ~ Dose * Plant.type, data = shoot_biomass)
+summary(anova_shoot)
+
+# Tukey's post-hoc test
+tukey_shoot <- HSD.test(anova_shoot, "Dose", group = TRUE)
+
+# Plot Shoot Biomass
+ggplot(shoot_summary, aes(x = Dose, y = Mean_Shoot, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Shoot Biomass by Dose and Plant Type", x = "Dose", y = "Shoot Biomass (gm)") +
+  theme_minimal()
+
+
+# Subset the dataset for root biomass analysis
+root_biomass <- Plant_traits %>%
+  select(Dose, Plant.type, Root.Biomass_harvestday.gm.)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+root_summary <- root_biomass %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Root = mean(Root.Biomass_harvestday.gm., na.rm = TRUE),
+    SE_Root = sd(Root.Biomass_harvestday.gm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Root Biomass
+anova_root <- aov(Root.Biomass_harvestday.gm. ~ Dose * Plant.type, data = root_biomass)
+summary(anova_root)
+
+# Tukey's post-hoc test
+tukey_root <- HSD.test(anova_root, "Dose", group = TRUE)
+
+# Plot Root Biomass
+ggplot(root_summary, aes(x = Dose, y = Mean_Root, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Root Biomass by Dose and Plant Type", x = "Dose", y = "Root Biomass (gm)") +
+  theme_minimal()
 
 
 
+# Subset the dataset for plant height analysis
+plant_height <- Plant_traits %>%
+  select(Dose, Plant.type, Plant_Height_Harvestday.cm.)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+height_summary <- plant_height %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Height = mean(Plant_Height_Harvestday.cm., na.rm = TRUE),
+    SE_Height = sd(Plant_Height_Harvestday.cm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Plant Height
+anova_height <- aov(Plant_Height_Harvestday.cm. ~ Dose * Plant.type, data = plant_height)
+summary(anova_height)
+
+# Tukey's post-hoc test
+tukey_height <- HSD.test(anova_height, "Dose", group = TRUE)
+
+# Plot Plant Height
+ggplot(height_summary, aes(x = Dose, y = Mean_Height, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin = Mean_Height - SE_Height, ymax = Mean_Height + SE_Height), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Plant Height by Dose and Plant Type", x = "Dose", y = "Plant Height (cm)") +
+  theme_minimal()
+
+
+# Subset the dataset for root length analysis
+root_length <- Plant_traits %>%
+  select(Dose, Plant.type, Root.Length..cm.)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+length_summary <- root_length %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Length = mean(Root.Length..cm., na.rm = TRUE),
+    SE_Length = sd(Root.Length..cm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Root Length
+anova_length <- aov(Root.Length..cm. ~ Dose * Plant.type, data = root_length)
+summary(anova_length)
+
+# Tukey's post-hoc test
+tukey_length <- HSD.test(anova_length, "Dose", group = TRUE)
+
+# Plot Root Length
+ggplot(length_summary, aes(x = Dose, y = Mean_Length, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin = Mean_Length - SE_Length, ymax = Mean_Length + SE_Length), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Root Length by Dose and Plant Type", x = "Dose", y = "Root Length (cm)") +
+  theme_minimal()
 
 
 
+# Subset the dataset for nodule count analysis
+nodule_count <- Plant_traits %>%
+  select(Dose, Plant.type, Nodules.Count.no..)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+nodule_summary <- nodule_count %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Nodule = mean(Nodules.Count.no.., na.rm = TRUE),
+    SE_Nodule = sd(Nodules.Count.no.., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Nodule Count
+anova_nodule <- aov(Nodules.Count.no.. ~ Dose * Plant.type, data = nodule_count)
+summary(anova_nodule)
+
+# Tukey's post-hoc test
+tukey_nodule <- HSD.test(anova_nodule, "Dose", group = TRUE)
+
+# Plot Nodule Count
+ggplot(nodule_summary, aes(x = Dose, y = Mean_Nodule, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9)) +
+  geom_errorbar(aes(ymin = Mean_Nodule - SE_Nodule, ymax = Mean_Nodule + SE_Nodule), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Nodule Count by Dose and Plant Type", x = "Dose", y = "Nodule Count") +
+  theme_minimal()
 
 
 
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(agricolae)
+
+# Subset the dataset for shoot and root biomass analysis
+biomass_data <- Plant_traits %>%
+  select(Dose, Plant.type, Fresh.Biomass_harvestday..gm., Root.Biomass_harvestday.gm.)
+
+# Calculate mean and standard error for each group (Dose and Plant.type)
+biomass_summary <- biomass_data %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Shoot = mean(Fresh.Biomass_harvestday..gm., na.rm = TRUE),
+    SE_Shoot = sd(Fresh.Biomass_harvestday..gm., na.rm = TRUE) / sqrt(n()),
+    Mean_Root = mean(Root.Biomass_harvestday.gm., na.rm = TRUE),
+    SE_Root = sd(Root.Biomass_harvestday.gm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Shoot and Root Biomass
+anova_shoot <- aov(Fresh.Biomass_harvestday..gm. ~ Dose * Plant.type, data = biomass_data)
+anova_root <- aov(Root.Biomass_harvestday.gm. ~ Dose * Plant.type, data = biomass_data)
+
+# Perform Tukey's HSD test for shoot and root biomass if ANOVA is significant
+letters_shoot <- rep(NA, nrow(biomass_summary))
+letters_root <- rep(NA, nrow(biomass_summary))
+
+# Check if ANOVA is significant for Shoot Biomass
+if (summary(anova_shoot)[[1]][["Pr(>F)"]][1] < 0.05) {
+  tukey_shoot <- HSD.test(anova_shoot, "Dose", group = TRUE)
+  for (i in 1:nrow(biomass_summary)) {
+    group <- biomass_summary$Dose[i]
+    letters_shoot[i] <- tukey_shoot$groups[as.character(group), "groups"]
+  }
+}
+
+# Check if ANOVA is significant for Root Biomass
+if (summary(anova_root)[[1]][["Pr(>F)"]][1] < 0.05) {
+  tukey_root <- HSD.test(anova_root, "Dose", group = TRUE)
+  for (i in 1:nrow(biomass_summary)) {
+    group <- biomass_summary$Dose[i]
+    letters_root[i] <- tukey_root$groups[as.character(group), "groups"]
+  }
+}
+
+# Add Tukey letters to the biomass_summary
+biomass_summary$letters_shoot <- letters_shoot
+biomass_summary$letters_root <- letters_root
+
+# Create bar plot for shoot and root biomass with Tukey letters
+ggplot(biomass_summary, aes(x = Dose, fill = Plant.type)) +
+  geom_bar(aes(y = Mean_Shoot), stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), width = 0.2, position = position_dodge(0.9)) +
+  geom_bar(aes(y = Mean_Root), stat = "identity", position = position_dodge(width = 0.9), colour = "black", alpha = 0.5) +
+  geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Plant Biomass (Shoot and Root) by Dose and Plant Type", x = "Dose", y = "Biomass (gm)") +
+  theme_minimal() +
+  facet_wrap(~ Plant.type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  # Add Tukey letters for shoot biomass
+  geom_text(aes(y = Mean_Shoot + SE_Shoot + 0.5, label = letters_shoot), position = position_dodge(0.9), vjust = -0.5) +
+  # Add Tukey letters for root biomass
+  geom_text(aes(y = Mean_Root + SE_Root + 0.5, label = letters_root), position = position_dodge(0.9), vjust = -0.5)
 
 
 
+# Bar plot for Shoot Biomass
+ggplot(biomass_summary, aes(x = Dose, fill = Plant.type)) +
+  geom_bar(aes(y = Mean_Shoot), stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Shoot Biomass by Dose and Plant Type", x = "Dose", y = "Shoot Biomass (gm)") +
+  theme_minimal() +
+  facet_wrap(~ Plant.type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  # Add Tukey letters for shoot biomass
+  geom_text(aes(y = Mean_Shoot + SE_Shoot + 0.5, label = letters_shoot), position = position_dodge(0.9), vjust = -0.5)
 
 
+# Bar plot for Root Biomass
+ggplot(biomass_summary, aes(x = Dose, fill = Plant.type)) +
+  geom_bar(aes(y = Mean_Root), stat = "identity", position = position_dodge(width = 0.9), colour = "black", alpha = 0.5) +
+  geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Root Biomass by Dose and Plant Type", x = "Dose", y = "Root Biomass (gm)") +
+  theme_minimal() +
+  facet_wrap(~ Plant.type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  # Add Tukey letters for root biomass
+  geom_text(aes(y = Mean_Root + SE_Root + 0.5, label = letters_root), position = position_dodge(0.9), vjust = -0.5)
 
+# Subset the dataset for plant height analysis
+plant_height_data <- Plant_traits %>%
+  select(Dose, Plant.type, Plant_Height_Harvestday.cm.)
 
+# Calculate mean and standard error for Plant Height
+height_summary <- plant_height_data %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    Mean_Height = mean(Plant_Height_Harvestday.cm., na.rm = TRUE),
+    SE_Height = sd(Plant_Height_Harvestday.cm., na.rm = TRUE) / sqrt(n())
+  )
 
+# ANOVA for Plant Height
+anova_height <- aov(Plant_Height_Harvestday.cm. ~ Dose * Plant.type, data = plant_height_data)
 
+# Perform Tukey's HSD test for Plant Height if ANOVA is significant
+letters_height <- rep(NA, nrow(height_summary))
 
+if (summary(anova_height)[[1]][["Pr(>F)"]][1] < 0.05) {
+  tukey_height <- HSD.test(anova_height, "Dose", group = TRUE)
+  for (i in 1:nrow(height_summary)) {
+    group <- height_summary$Dose[i]
+    letters_height[i] <- tukey_height$groups[as.character(group), "groups"]
+  }
+}
 
+# Add Tukey letters to the height_summary
+height_summary$ plant_traits <- letters_height
+
+# Plot Plant Height
+ggplot(height_summary, aes(x = Dose, y = Mean_Height, fill = Plant.type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Height - SE_Height, ymax = Mean_Height + SE_Height), width = 0.2, position = position_dodge(0.9)) +
+  labs(title = "Plant Height by Dose and Plant Type", x = "Dose", y = "Plant Height (cm)") +
+  theme_minimal() +
+  facet_wrap(~ Plant.type) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(y = Mean_Height + SE_Height + 0.5, label = letters_height), position = position_dodge(0.9), vjust = -0.5)
 
 
 
@@ -376,3 +620,51 @@ ggplot(summary_data, aes(x = Dose, fill = Plant.type)) +
   # Add Tukey's letters for root biomass
   geom_text(aes(y = Root_Biomass_Mean + Root_Biomass_SE + 0.5, label = letters_root), 
             position = position_dodge(0.9), vjust = -0.5)
+
+# Subset the dataset for plant height analysis, including Fertilizer Type
+plant_height_data <- Plant_traits %>%
+  select(Dose, Plant.type, Plant_Height_Harvestday.cm., Treatment) %>%
+  mutate(Fertilizer_Type = ifelse(grepl("UF", Treatment), "UF", 
+                                  ifelse(grepl("MF", Treatment), "MF", "None")))
+
+# Calculate mean and standard error for Plant Height by Fertilizer Type and Dose
+height_summary <- plant_height_data %>%
+  group_by(Dose, Plant.type, Fertilizer_Type) %>%
+  summarise(
+    Mean_Height = mean(Plant_Height_Harvestday.cm., na.rm = TRUE),
+    SE_Height = sd(Plant_Height_Harvestday.cm., na.rm = TRUE) / sqrt(n())
+  )
+
+# ANOVA for Plant Height
+anova_height <- aov(Plant_Height_Harvestday.cm. ~ Dose * Fertilizer_Type * Plant.type, data = plant_height_data)
+
+# Initialize letters_height to avoid issues
+letters_height <- rep(NA, nrow(height_summary))
+
+# Check if the ANOVA results are significant for Plant Height
+if (summary(anova_height)[[1]][["Pr(>F)"]][1] < 0.05) {
+  # Perform Tukey's HSD test for Plant Height
+  tukey_height <- HSD.test(anova_height, "Dose", group = TRUE)
+  
+  # Assign Tukey's letters based on groups
+  for (i in 1:nrow(height_summary)) {
+    group <- height_summary$Dose[i]
+    letters_height[i] <- tukey_height$groups[as.character(group), "groups"]
+  }
+}
+
+# Add Tukey letters to the height_summary
+height_summary$letters_height <- letters_height
+
+# Plot Plant Height with Tukey letters
+ggplot(height_summary, aes(x = as.factor(Dose), y = Mean_Height, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Height - SE_Height, ymax = Mean_Height + SE_Height), width = 0.2, position = position_dodge(0.8)) +
+  labs(title = "Plant Height by Dose, Fertilizer Type, and Plant Type", x = "Dose", y = "Plant Height (cm)") +
+  theme_minimal() +
+  facet_wrap(~ Plant.type) +  # Facet by Plant Type
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(y = Mean_Height + SE_Height + 0.5, label = letters_height), position = position_dodge(0.8), vjust = -0.5) +
+  scale_fill_manual(values = c("UF" = "blue", "MF" = "red", "None" = "grey"))  # Custom colors for fertilizer types
+data(plant_traits)
+head(plant_traits)

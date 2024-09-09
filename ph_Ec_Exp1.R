@@ -7,9 +7,8 @@ library(ggplot2)
 
 # Setting the working directory
 
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/Niraj Pot Experiment/Modified Data File")
+setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
 list.files()
-
 # Reading the CSV file
 ph_ec_data <- read.csv("pH_ec_data_exp1_final.csv") 
 
@@ -256,3 +255,49 @@ p_ec <- ggplot(ec_long, aes(x = Dose, y = EC, fill = Time_Point)) +
 
 # Plot both together in one layout
 grid.arrange(p_ph, p_ec, nrow = 2)
+
+colnames(ph_ec_data)
+
+# Assuming your dataset is named 'ph_ec_data'
+# Select only the relevant columns for correlation analysis
+correlation_data <- ph_ec_data[, c("Ionic.strength..mol.L.", 
+                                   "pH_beforefertilization", 
+                                   "pH_afterFertilization_7thday", 
+                                   "pH_Afterfertilization_30days", 
+                                   "pH.Harvest.day_after2ndfertilization_60thday", 
+                                   "EC_beforefertilization", 
+                                   "EC_Afterfertilization_30days", 
+                                   "EC.harvest.day")]
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(correlation_data, use = "complete.obs")
+
+# Print the correlation matrix
+print(correlation_matrix)
+# Install required packages if you haven't already
+# install.packages("ggcorrplot")
+
+# Load the ggcorrplot library for visualizing correlations
+library(ggcorrplot)
+
+# Assuming your dataset is named 'ph_ec_data'
+# Select only the relevant columns for correlation analysis
+correlation_data <- ph_ec_data[, c("Ionic.strength..mol.L.", 
+                                   "pH_beforefertilization", 
+                                   "pH_afterFertilization_7thday", 
+                                   "pH_Afterfertilization_30days", 
+                                   "pH.Harvest.day_after2ndfertilization_60thday", 
+                                   "EC_beforefertilization", 
+                                   "EC_Afterfertilization_30days", 
+                                   "EC.harvest.day")]
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(correlation_data, use = "complete.obs")
+
+# Visualize the correlation matrix using a heatmap
+ggcorrplot(correlation_matrix, 
+           method = "circle", 
+           lab = TRUE,          # Add correlation values on the heatmap
+           type = "lower",      # Show only the lower triangle
+           title = "Correlation Heatmap",
+           colors = c("red", "white", "blue")) # Define colors for the heatmap

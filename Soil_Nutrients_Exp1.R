@@ -118,6 +118,9 @@ cld(pairwise_comparisons_treatment)
 
 
 
+
+
+
 # Old code:
 
 
