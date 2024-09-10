@@ -5,7 +5,7 @@ library(car)
 library(emmeans)
 library(multcomp)
 
-# Set working directory (replace with your path)
+# Set working directory 
 setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
 list.files()
 
