@@ -124,6 +124,15 @@ ggplot(biomass_summary, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
   geom_text(aes(y = Mean_Root + SE_Root + 0.5, label = letters_root), position = position_dodge(0.9), vjust = -0.5)
 
 
+
+
+
+
+
+
+
+
+
 # Subset the dataset to include relevant columns for Root Length, Shoot Height, and Nodules Count
 traits_data <- Plant_traits %>%
   select(Dose..N.kg.ha., Plant.type, Fertilizer.type, Root.Length..cm., Plant_Height_Harvestday.cm., Nodules.Count.no..) %>%
@@ -225,3 +234,4 @@ ggplot(traits_summary, aes(x = Dose, y = Mean_Nodules_Count, fill = Fertilizer_T
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Nodules_Count + SE_Nodules_Count + 0.5, label = letters_nodules), position = position_dodge(0.9), vjust = -0.5)
+
