@@ -4,6 +4,11 @@ library(ggplot2)
 library(emmeans)
 library(gridExtra)
 library(car)  # For ANOVA
+# Reading the CSV file
+ph_ec_data <- read.csv("pH_ec_data_exp1_final.csv")
+head(ph_ec_data)
+# Check column names in the dataset
+colnames(ph_ec_data)
 # Ensure Time_Point is treated as a factor in both datasets (pH and EC data)
 ph_long <- ph_ec_data %>%
   pivot_longer(cols = c(pH_beforefertilization, pH_afterFertilization_7thday, 
