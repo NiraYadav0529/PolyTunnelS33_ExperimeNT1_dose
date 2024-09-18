@@ -4,7 +4,7 @@ library(tidyverse)
 library(car)
 library(emmeans)
 library(ggplot2)
-
+library(dplyr)
 # Setting the working directory
 
 setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
@@ -163,6 +163,7 @@ ph_long <- ph_ec_data %>%
 
 # Check the first few rows to ensure it was reshaped correctly
 head(ph_long)
+library(ggplot2)
 # Plot pH across time points
 p1 <- ggplot(ph_long, aes(x = Time_Point, y = pH, fill = Dose)) +
   geom_boxplot() +
@@ -269,6 +270,8 @@ correlation_data <- ph_ec_data[, c("Ionic.strength..mol.L.",
                                    "EC_Afterfertilization_30days", 
                                    "EC.harvest.day")]
 
+
+
 # Calculate the correlation matrix
 correlation_matrix <- cor(correlation_data, use = "complete.obs")
 
@@ -300,4 +303,4 @@ ggcorrplot(correlation_matrix,
            lab = TRUE,          # Add correlation values on the heatmap
            type = "lower",      # Show only the lower triangle
            title = "Correlation Heatmap",
-           colors = c("red", "white", "blue")) # Define colors for the heatmap
+           colors = c("black", "white", "grey")) # Define colors for the heatmap
