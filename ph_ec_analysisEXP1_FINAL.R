@@ -120,3 +120,16 @@ anova_results_EC <- Anova(interaction_model_EC, type = "II")
 print(anova_results_EC)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+

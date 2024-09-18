@@ -63,7 +63,7 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
   geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
   geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
                 width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Shoot Biomass by Dose and Fertilizer Type", x = "Dose (N kg/ha)", 
+  labs(title = "Shoot Biomass at Harvest Day", x = "Dose (N kg/ha)", 
        y = "Shoot Biomass (g, +/- SE)", fill = 'Fertilizer') +
   facet_wrap(~ Plant.type) +
   scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
@@ -85,24 +85,24 @@ qqPlot(m1_root)
 Anova(m1_root, type = "II")
 
 # Perform multiple comparison test (Tukey HSD) for root biomass
-pairwise_comparisons_root <- emmeans(m1_root, ~ Dose | Plant.type)
-letters_root <- cld(pairwise_comparisons_root) %>%
+pairwise_comparisons_root <- emmeans(m1_root, ~ Dose + Fertilizer_Type | Plant.type)
+letters_root <- cld(pairwise_comparisons_root, Letters = letters) %>%
+  mutate(.group = stringr::str_trim(.group)) %>% 
   as.data.frame()
 
-# Merge the letters for root biomass with biomass_summary using Dose and Plant.type
+# Merge the letters for root biomass with biomass_summary using Dose, Fertilizer_Type, and Plant.type
 biomass_summary_root <- biomass_summary %>%
-  left_join(letters_root, by = c("Dose", "Plant.type"))
+  left_join(letters_root, by = c("Dose", "Fertilizer_Type", "Plant.type"))
 
-# ROOT BIOMASS PLOT
+# ROOT BIOMASS PLOT WITH SIGNIFICANCE LETTERS
 ggplot(biomass_summary_root, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black", alpha = 0.5) +
   geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), 
                 width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Root Biomass by Dose and Fertilizer Type", x = "Dose (N kg/ha)", y = "Root Biomass (gm)") +
+  labs(title = "Root Biomass at Harvest Day", x = "Dose (N kg/ha)", y = "Root Biomass (g, +/- SE)", fill = 'Fertilizer') +
   facet_wrap(~ Plant.type) +
   scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_text(aes(y = Mean_Root + SE_Root + 0.5, label = .group), 
-            position = position_dodge(0.9), vjust = -0.5)
-
+  geom_text(aes(y = Mean_Root + SE_Root + 3, label = .group), 
+            position = position_dodge(0.9))

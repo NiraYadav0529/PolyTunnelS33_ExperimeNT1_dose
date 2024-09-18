@@ -2,27 +2,14 @@
 library(ggplot2)
 library(dplyr)
 library(agricolae)
-
-# Load required libraries
 library(tidyverse)
 library(car)
 library(emmeans)
 library(ggplot2)
-
-# Set working directory (adjust as needed)
-setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
-list.files()
 Plant_traits <-read.csv("Biomass_height_stem_data_exp1.csv")
 # Load the dataset
 head(Plant_traits)
 colnames(Plant_traits)
-
-
-# Load necessary libraries
-library(ggplot2)
-library(dplyr)
-library(agricolae)
-
 # Subset the dataset to include relevant columns and convert variables to factors
 biomass_data <- Plant_traits %>%
   select(Dose..N.kg.ha., Plant.type, Fertilizer.type, Fresh.Biomass_harvestday..gm., Root.Biomass_harvestday.gm.) %>%
@@ -45,6 +32,13 @@ biomass_summary <- biomass_data %>%
 # Perform ANOVA for Shoot and Root Biomass
 anova_shoot <- aov(Fresh.Biomass_harvestday..gm. ~ Dose * Fertilizer_Type * Plant.type, data = biomass_data)
 anova_root <- aov(Root.Biomass_harvestday.gm. ~ Dose * Fertilizer_Type * Plant.type, data = biomass_data)
+
+summary(anova_shoot)
+summary(anova_root)
+
+
+
+
 
 # Perform Tukey's HSD test for shoot and root biomass
 letters_shoot <- rep(NA, nrow(biomass_summary))

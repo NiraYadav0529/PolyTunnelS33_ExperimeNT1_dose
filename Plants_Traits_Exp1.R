@@ -668,3 +668,150 @@ ggplot(height_summary, aes(x = as.factor(Dose), y = Mean_Height, fill = Fertiliz
   scale_fill_manual(values = c("UF" = "blue", "MF" = "red", "None" = "grey"))  # Custom colors for fertilizer types
 data(plant_traits)
 head(plant_traits)
+
+
+
+
+
+
+
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Set the working directory if required (adjust path accordingly)
+setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
+
+# Load the dataset
+Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
+
+# Inspect the data
+head(Plant_traits)
+
+# Ensure that Dose is treated as a factor for analysis
+Plant_traits$Dose <- factor(Plant_traits$Dose..N.kg.ha.)
+
+# Visualizing C:N ratio under different nitrogen doses by Plant type
+ggplot(Plant_traits, aes(x = Dose, y = Leaf.C.N..ratio., fill = Dose)) + 
+  geom_boxplot() + 
+  facet_wrap(~Plant.type) +
+  labs(title = "C:N Ratio in Leaves by Nitrogen Dose and Plant Type", 
+       x = "Nitrogen Dose (kg/ha)", 
+       y = "Leaf C:N Ratio") +
+  theme_minimal()
+
+# Perform linear regression analysis between Nitrogen Dose and C:N Ratio
+m1_cn_ratio <- lm(Leaf.C.N..ratio. ~ Dose * Plant.type, data = Plant_traits)
+
+# Summary of the regression model
+summary(m1_cn_ratio)
+
+# Checking residuals for linearity and normality
+residualPlot(m1_cn_ratio)
+qqPlot(m1_cn_ratio)
+
+# ANOVA test for significance of effects
+Anova(m1_cn_ratio)
+
+# Perform Tukey HSD Post-hoc test to check pairwise differences between doses and plant types
+pairwise_comparisons_cn_ratio <- emmeans(m1_cn_ratio, ~ Dose | Plant.type)
+cld_cn_ratio <- cld(pairwise_comparisons_cn_ratio, Letters = letters, adjust = "tukey")
+
+# Convert compact letter display results to a data frame
+cld_cn_ratio_df <- as.data.frame(cld_cn_ratio)
+
+# Merge the Tukey letters with summary data (means and standard errors)
+summary_data <- merge(summary, cld_cn_ratio_df[, c("Dose", "Plant.type", ".group")], by = c("Dose", "Plant.type"))
+
+# Visualize C:N ratio by Nitrogen Dose and Plant Type with Means, Standard Errors, and Tukey Letters
+ggplot(summary_data, aes(x = Dose, y = mean_cn_ratio, fill = Dose)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = mean_cn_ratio - se_cn_ratio, ymax = mean_cn_ratio + se_cn_ratio), 
+                width = 0.2, position = position_dodge(0.9)) +
+  facet_wrap(~Plant.type) +
+  geom_text(aes(label = .group, y = mean_cn_ratio + se_cn_ratio + 0.05), position = position_dodge(0.9), vjust = -0.5) +
+  labs(title = "C:N Ratio in Leaves by Nitrogen Dose and Plant Type with Tukey Letters", 
+       x = "Nitrogen Dose (kg/ha)", 
+       y = "Mean Leaf C:N Ratio") +
+  theme_minimal()
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(emmeans)
+library(multcompView)
+
+# Load the dataset
+Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
+
+# Ensure that Dose is treated as a factor for analysis
+Plant_traits$Dose <- factor(Plant_traits$Dose..N.kg.ha.)
+
+# Calculate mean and standard error for each group (Dose and Plant type)
+summary_data <- Plant_traits %>%
+  group_by(Dose, Plant.type) %>%
+  summarise(
+    mean_cn_ratio = mean(Leaf.C.N..ratio., na.rm = TRUE),
+    se_cn_ratio = sd(Leaf.C.N..ratio., na.rm = TRUE) / sqrt(n())
+  )
+
+# Perform linear regression analysis between Nitrogen Dose and C:N Ratio
+m1_cn_ratio <- lm(Leaf.C.N..ratio. ~ Dose * Plant.type, data = Plant_traits)
+
+# Perform Tukey HSD Post-hoc test to check pairwise differences between doses and plant types
+pairwise_comparisons_cn_ratio <- emmeans(m1_cn_ratio, ~ Dose | Plant.type)
+
+# Since the Tukey adjustment isn't appropriate for multiple groups, sidak was used
+cld_cn_ratio <- cld(pairwise_comparisons_cn_ratio, Letters = letters, adjust = "sidak")
+
+# Convert compact letter display results to a data frame
+cld_cn_ratio_df <- as.data.frame(cld_cn_ratio)
+
+# Merge the Tukey letters with summary data (means and standard errors)
+summary_data <- merge(summary_data, cld_cn_ratio_df[, c("Dose", "Plant.type", ".group")], by = c("Dose", "Plant.type"))
+
+# Visualize C:N ratio by Nitrogen Dose and Plant Type with Means, Standard Errors, and Tukey Letters
+ggplot(summary_data, aes(x = Dose, y = mean_cn_ratio, fill = Dose)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = mean_cn_ratio - se_cn_ratio, ymax = mean_cn_ratio + se_cn_ratio), 
+                width = 0.2, position = position_dodge(0.9)) +
+  facet_wrap(~Plant.type) +
+  geom_text(aes(label = .group, y = mean_cn_ratio + se_cn_ratio + 0.05), position = position_dodge(0.9), vjust = -0.5) +
+  labs(title = "C:N Ratio in Leaves by Nitrogen Dose and Plant Type with Tukey Letters", 
+       x = "Nitrogen Dose (kg/ha)", 
+       y = "Mean Leaf C:N Ratio") +
+scale_fill_manual(values = c("grey20", "grey50", "grey80")) +
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
+
+# Perform linear regression analysis between Nitrogen Dose and C:N Ratio
+m1_cn_ratio <- lm(Leaf.C.N..ratio. ~ Dose * Plant.type, data = Plant_traits)
+
+# Summary of the regression model
+summary(m1_cn_ratio)
+
+# Checking residuals for linearity and normality
+residualPlot(m1_cn_ratio)
+qqPlot(m1_cn_ratio)
+
+# ANOVA test for significance of effects
+Anova(m1_cn_ratio)
+
+
+# Interpretation: Look for the effects of nitrogen doses and plant type on C:N ratios.
+# If high nitrogen doses result in lower C:N ratios, it could indicate excess nitrogen relative to carbon.
+

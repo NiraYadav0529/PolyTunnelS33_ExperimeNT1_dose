@@ -71,3 +71,20 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
             position = position_dodge(0.9))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
