@@ -4,6 +4,9 @@ library(tidyverse)
 library(car)
 library(emmeans)
 library(ggplot2)
+# Load necessary libraries
+library(emmeans)
+library(multcomp)
 setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
 list.files()
 
@@ -12,202 +15,240 @@ head(Soil_Nutrients)
 
 
 
-library(ggplot2)
+
+
+
+
+
+
+
+
+
+
+
+
+# Load required libraries
+library(tidyverse)
 library(car)
 library(emmeans)
+library(ggplot2)
 library(multcomp)
 
-# Visualize the distribution of Soil Bray P by Dose and Plant Type
-ggplot(Soil_Nutrients, aes(x = Dose, y = P.g.kg..dw.soil, fill = Dose)) + 
-  geom_boxplot() + 
+# Load data
+Soil_Nutrients <- read.csv("Soil_Nutrients_Extraction_EXP1.csv")
+
+# Inspect the first few rows of the dataset to check column names
+head(Soil_Nutrients)
+
+# Ensure that Dose, Plant.type, and Fertilizer.type are treated as factors for analysis
+Soil_Nutrients$Dose <- factor(Soil_Nutrients$Dose..N.kg.ha.)
+Soil_Nutrients$Plant.type <- factor(Soil_Nutrients$Plant.type)
+Soil_Nutrients$Fertilizer.type <- factor(Soil_Nutrients$Fertilizer.type)
+
+# Calculate mean and standard error for each group (Dose, Plant type, Fertilizer type)
+soil_summary <- Soil_Nutrients %>%
+  group_by(Dose, Plant.type, Fertilizer.type) %>%
+  summarize(
+    NH4_mean = mean(NH4.g.kg..dw.soil, na.rm = TRUE),
+    NH4_se = sd(NH4.g.kg..dw.soil, na.rm = TRUE) / sqrt(n()),
+    NO3_mean = mean(NO3.g.kg..dw.soil, na.rm = TRUE),
+    NO3_se = sd(NO3.g.kg..dw.soil, na.rm = TRUE) / sqrt(n()),
+    SPAD_mean = mean(SPAD.Data..nmol.ch.mg.fresh.weight., na.rm = TRUE),
+    SPAD_se = sd(SPAD.Data..nmol.ch.mg.fresh.weight., na.rm = TRUE) / sqrt(n())
+  )
+
+# 1. Visualize Soil Ammonium by Dose, Plant Type, and Fertilizer Type
+ggplot(soil_summary, aes(x = Dose, y = NH4_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = NH4_mean - NH4_se, ymax = NH4_mean + NH4_se), width = 0.2, position = position_dodge(0.9), color = "black") +
   facet_wrap(~ Plant.type) +
-  labs(title = "Soil Bray P by Dose and Plant Type", x = "Dose", y = "Soil Bray P (g/kg dw soil)") +
-  theme_minimal()
-# Fit the model
-m1_brayP <- lm(P.g.kg..dw.soil ~ Dose * Plant.type, data = Soil_Nutrients)
-summary(m1_brayP)
+  labs(title = "Soil Ammonium by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "Ammonium (g/kg dw soil)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) + # Set custom colors for Fertilizer.type
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
 
-# Check residuals for linearity and normality
-residualPlot(m1_brayP)  # Plot residuals vs fitted values
-qqPlot(m1_brayP)         # Q-Q plot to check normality of residuals
-
-# Test significance of the model effects
-Anova(m1_brayP, type = "II")
-
-# Perform multiple comparison test to see differences within Plant.type across Doses
-pairwise_comparisons <- emmeans(m1_brayP, ~ Dose | Plant.type)
-summary(pairwise_comparisons)
-
-# Generate compact letter display to visualize significant differences
-cld(pairwise_comparisons)
-
-# Compare the effects of Dose between different Plant types
-plant_type_comparisons <- emmeans(m1_brayP, pairwise ~ Plant.type | Dose)
-summary(plant_type_comparisons)
-
-# Visualize the significant differences with compact letter display
-cld(plant_type_comparisons)
-
-# Visualize the distribution of Soil Ammonium by Dose and Plant Type
-ggplot(Soil_Nutrients, aes(x = Dose, y = NH4.g.kg..dw.soil, fill = Dose)) + 
-  geom_boxplot() + 
+# 2. Visualize Soil Nitrate by Dose, Plant Type, and Fertilizer Type
+ggplot(soil_summary, aes(x = Dose, y = NO3_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = NO3_mean - NO3_se, ymax = NO3_mean + NO3_se), width = 0.2, position = position_dodge(0.9), color = "black") +
   facet_wrap(~ Plant.type) +
-  labs(title = "Soil Ammonium (NH4) by Dose and Plant Type", x = "Dose", y = "Soil Ammonium (g/kg dw soil)") +
-  theme_minimal()
+  labs(title = "Soil Nitrate by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "Nitrate (g/kg dw soil)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) + # Set custom colors for Fertilizer.type
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
 
-# Fit the model
-m1_nh4 <- lm((NH4.g.kg..dw.soil) ~ Dose * Plant.type, data = Soil_Nutrients)
+# 3. Visualize SPAD values (chlorophyll content) by Dose, Plant Type, and Fertilizer Type
+ggplot(soil_summary, aes(x = Dose, y = SPAD_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = SPAD_mean - SPAD_se, ymax = SPAD_mean + SPAD_se), width = 0.2, position = position_dodge(0.9), color = "black") +
+  facet_wrap(~ Plant.type) +
+  labs(title = "SPAD (Chlorophyll Content) by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "SPAD (nmol chlorophyll/mg fresh weight)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) + # Set custom colors for Fertilizer.type
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
+
+# 4. Fit the model for NH4 data
+m1_nh4 <- lm(NH4.g.kg..dw.soil ~ Dose * Plant.type * Fertilizer.type, data = Soil_Nutrients)
 summary(m1_nh4)
 
-# Check residuals to see if transformation is needed
+# Check residuals for linearity and normality
 residualPlot(m1_nh4)
 qqPlot(m1_nh4)
 
-# Test significance of the model effects
-Anova(m1_nh4)
+# Test significance of the model effects (ANOVA)
+Anova(m1_nh4, type = "II")
 
-# Perform multiple comparison test to see differences within Plant.type across Doses
-pairwise_comparisons_nh4 <- emmeans(m1_nh4, ~ Dose | Plant.type)
+# Perform multiple comparison test (Tukey HSD) for NH4 data
+pairwise_comparisons_nh4 <- emmeans(m1_nh4, ~ Dose | Plant.type | Fertilizer.type)
 summary(pairwise_comparisons_nh4)
 
-# Generate compact letter display to visualize significant differences
+# Visualize significant differences using compact letter display
 cld(pairwise_comparisons_nh4)
-# Visualize the distribution of Soil Nitrate by Dose and Plant Type
-ggplot(Soil_Nutrients, aes(x = Dose, y = NO3.g.kg..dw.soil, fill = Dose)) + 
-  geom_boxplot() + 
-  facet_wrap(~ Plant.type) +
-  labs(title = "Soil Nitrate (NO3) by Dose and Plant Type", x = "Dose", y = "Soil Nitrate (g/kg dw soil)") +
-  theme_minimal()
-# Fit the model
-m1_no3 <- lm(log10(NO3.g.kg..dw.soil) ~ Dose * Plant.type, data = Soil_Nutrients)
+
+# 5. Fit the model for NO3 data
+m1_no3 <- lm(NO3.g.kg..dw.soil ~ Dose * Plant.type * Fertilizer.type, data = Soil_Nutrients)
 summary(m1_no3)
 
-# Check residuals to see if transformation is needed
+# Check residuals for linearity and normality
 residualPlot(m1_no3)
 qqPlot(m1_no3)
 
-# Test significance of the model effects
-Anova(m1_no3)
+# Test significance of the model effects (ANOVA)
+Anova(m1_no3, type = "II")
 
-# Perform multiple comparison test to see differences within Plant.type across Doses
-pairwise_comparisons_no3 <- emmeans(m1_no3, ~ Dose | Plant.type)
+# Perform multiple comparison test (Tukey HSD) for NO3 data
+pairwise_comparisons_no3 <- emmeans(m1_no3, ~ Dose | Plant.type | Fertilizer.type)
 summary(pairwise_comparisons_no3)
 
-# Generate compact letter display to visualize significant differences
+# Visualize significant differences using compact letter display
 cld(pairwise_comparisons_no3)
-# Fit the model including Treatment
-m1_treatment <- lm(log10(NO3.g.kg..dw.soil) ~ Dose * Plant.type * Treatment, data = Soil_Nutrients)
+
+# 6. Fit the model for SPAD data
+m1_spad <- lm(SPAD.Data..nmol.ch.mg.fresh.weight. ~ Dose * Plant.type * Fertilizer.type, data = Soil_Nutrients)
+summary(m1_spad)
+
+# Check residuals for linearity and normality
+residualPlot(m1_spad)
+qqPlot(m1_spad)
+
+# Test significance of the model effects (ANOVA)
+Anova(m1_spad, type = "II")
+
+# Perform multiple comparison test (Tukey HSD) for SPAD data
+pairwise_comparisons_spad <- emmeans(m1_spad, ~ Dose | Plant.type | Fertilizer.type)
+summary(pairwise_comparisons_spad)
+
+# Visualize significant differences using compact letter display
+cld(pairwise_comparisons_spad)
+
+
+# Correlation Analysis
+
+# Correlation between SPAD readings and soil ammonium, handling missing values
+cor_ammonium_spad <- cor(Soil_Nutrients$SPAD.Data..nmol.ch.mg.fresh.weight., 
+                         Soil_Nutrients$NH4.g.kg..dw.soil, method = "pearson", use = "complete.obs")
+print(cor_ammonium_spad)
+
+# Correlation between SPAD readings and soil nitrate, handling missing values
+cor_nitrate_spad <- cor(Soil_Nutrients$SPAD.Data..nmol.ch.mg.fresh.weight., 
+                        Soil_Nutrients$NO3.g.kg..dw.soil, method = "pearson", use = "complete.obs")
+print(cor_nitrate_spad)
+
+# Modeling Interaction with Treatment (UrVAL vs. MF)
+
+# Fit the model including Treatment for Nitrate
+m1_treatment <- lm(log10(NO3.g.kg..dw.soil) ~ Dose * Plant.type * Fertilizer.type, data = Soil_Nutrients)
 summary(m1_treatment)
 
-# Check residuals
+# Check residuals for model with Treatment
 residualPlot(m1_treatment)
 qqPlot(m1_treatment)
 
-# Test significance
+# Test significance of the model effects (ANOVA)
 Anova(m1_treatment)
 
-# Perform multiple comparison test
-pairwise_comparisons_treatment <- emmeans(m1_treatment, ~ Dose | Plant.type | Treatment)
+# Perform pairwise comparison test for Treatment
+pairwise_comparisons_treatment <- emmeans(m1_treatment, ~ Dose | Plant.type | Fertilizer.type)
 summary(pairwise_comparisons_treatment)
 
-# Visualize the significant differences
+# Visualize significant differences with compact letter display
 cld(pairwise_comparisons_treatment)
 
+# 3. Correlation Analysis between SPAD Readings and Soil Nutrients
 
+# Correlation between SPAD readings and soil ammonium (NH4), handling missing values
+cor_ammonium_spad <- cor(Soil_Nutrients$SPAD.Data..nmol.ch.mg.fresh.weight., 
+                         Soil_Nutrients$NH4.g.kg..dw.soil, method = "pearson", use = "complete.obs")
+print(cor_ammonium_spad)
 
+# Correlation between SPAD readings and soil nitrate (NO3), handling missing values
+cor_nitrate_spad <- cor(Soil_Nutrients$SPAD.Data..nmol.ch.mg.fresh.weight., 
+                        Soil_Nutrients$NO3.g.kg..dw.soil, method = "pearson", use = "complete.obs")
+print(cor_nitrate_spad)
 
+# NH4 Data: Perform multiple comparison test (Tukey HSD) and get compact letter display
+pairwise_comparisons_nh4 <- emmeans(m1_nh4, ~ Dose | Plant.type | Fertilizer.type)
+cld_nh4 <- cld(pairwise_comparisons_nh4, Letters = letters, adjust = "tukey")
 
+# Join the cld results with soil_summary
+cld_nh4 <- as.data.frame(cld_nh4)
+merged_nh4 <- merge(soil_summary, cld_nh4, by = c("Dose", "Plant.type", "Fertilizer.type"))
 
+# Plot NH4 data with compact letter display (CLD) on the plot
+ggplot(merged_nh4, aes(x = Dose, y = NH4_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = NH4_mean - NH4_se, ymax = NH4_mean + NH4_se), width = 0.2, position = position_dodge(0.9), color = "black") +
+  facet_wrap(~ Plant.type) +
+  geom_text(aes(x = Dose, y = NH4_mean + NH4_se + 0.05, label = .group), position = position_dodge(0.9), vjust = 0, color = "black") +
+  labs(title = "Soil Ammonium by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "Ammonium (g/kg dw soil)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) +
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
+# NO3 Data: Perform multiple comparison test (Tukey HSD) and get compact letter display
+pairwise_comparisons_no3 <- emmeans(m1_no3, ~ Dose | Plant.type | Fertilizer.type)
+cld_no3 <- cld(pairwise_comparisons_no3, Letters = letters, adjust = "tukey")
 
+# Join the cld results with soil_summary
+cld_no3 <- as.data.frame(cld_no3)
+merged_no3 <- merge(soil_summary, cld_no3, by = c("Dose", "Plant.type", "Fertilizer.type"))
 
+# Plot NO3 data with compact letter display (CLD) on the plot
+ggplot(merged_no3, aes(x = Dose, y = NO3_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = NO3_mean - NO3_se, ymax = NO3_mean + NO3_se), width = 0.2, position = position_dodge(0.9), color = "black") +
+  facet_wrap(~ Plant.type) +
+  geom_text(aes(x = Dose, y = NO3_mean + NO3_se + 0.05, label = .group), position = position_dodge(0.9), vjust = 0, color = "black") +
+  labs(title = "Soil Nitrate by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "Nitrate (g/kg dw soil)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) +
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
+# SPAD Data: Perform multiple comparison test (Tukey HSD) and get compact letter display
+pairwise_comparisons_spad <- emmeans(m1_spad, ~ Dose | Plant.type | Fertilizer.type)
+cld_spad <- cld(pairwise_comparisons_spad, Letters = letters, adjust = "tukey")
 
-# Old code:
+# Join the cld results with soil_summary
+cld_spad <- as.data.frame(cld_spad)
+merged_spad <- merge(soil_summary, cld_spad, by = c("Dose", "Plant.type", "Fertilizer.type"))
 
-
-# Visualize the distribution of Soil_bray_P by Dose and Plant.type
-ggplot(xrf, aes(x = Dose, y = Soil_bray_P.mg.L., colour = Dose)) + 
-  geom_boxplot() + 
-  facet_wrap(~Plant.type) +
-  labs(title = "Soil Bray P by Dose and Plant Type", x = "Dose", y = "Soil Bray P (mg/L)")
-
-# Fit the model after ensuring the 'Plant.type' variable is present
-m1_brayP <- lm(Soil_bray_P.mg.L. ~ Dose * Plant.type , data = xrf)
-summary(m1_brayP)
-# Check residuals for linearity and normality
-library(car)
-residualPlot(m1_brayP)  # Plot residuals vs fitted values
-qqPlot(m1_brayP)         # Q-Q plot to check normality of residuals
-# Test significance of the model effects
-library(car)
-# Type II ANOVA test to check significance of effects
-Anova(m1_brayP, type = "II")
-# Perform multiple comparison test to see differences within Plant.type across Doses
-library(emmeans)
-
-# Get pairwise comparisons for Dose within each Plant.type
-pairwise_comparisons <- emmeans(m1_brayP, ~ Dose | Plant.type)
-summary(pairwise_comparisons)
-
-# Generate compact letter display to visualize significant differences
-multcomp::cld(pairwise_comparisons)
-
-# Compare the effects of Dose between different Plant types
-plant_type_comparisons <- emmeans(m1_brayP, pairwise ~ Plant.type | Dose)
-summary(plant_type_comparisons)
-
-# Visualize the significant differences with compact letter display
-multcomp::cld(plant_type_comparisons)
-
-
-
-#sOIL_Nutrient_AMMONIUM
-ggplot(xrf, aes(x = Dose, y = Soil_NH4..mg.L., colour = Dose)) + 
-  geom_boxplot() + 
-  facet_wrap(~Plant.type)
-
-
-# Fit the model after ensuring the 'Plant.type' variable is present
-m1_nh4 <- lm(log10(Soil_NH4..mg.L.) ~ Dose * Plant.type , data = xrf)
-summary(m1_nh4)
-#Need to find the calibration range for ammonium and ask with Jeff.
-# check residuals to see if transformation needed
-residualPlot(m1_nh4)
-qqPlot(m1_nh4)
-# test significance
-Anova(m1_nh4)
-# perform multiple comparison test
-library(emmeans)
-# pairs(emmeans(m1_brayP, ~ Dose | Plant.type))
-multcomp::cld(emmeans(m1_nh4, ~ Dose | Plant.type))
-
-
-
-#sOIL_Nutrient_Nitrate
-ggplot(xrf, aes(x = Dose, y = Soil_NO3.mg.L., colour = Dose)) + 
-  geom_boxplot() + 
-  facet_wrap(~Plant.type)
-
-
-# Fit the model after ensuring the 'Plant.type' variable is present
-m1_no3 <- lm(log10(Soil_NO3.mg.L.) ~ Dose * Plant.type , data = xrf)
-summary(m1_no3)
-
-# check residuals to see if transformation needed
-residualPlot(m1_no3)
-qqPlot(m1_no3)
-# test significance
-Anova(m1_no3)
-
-# pairs(emmeans(m1_brayP, ~ Dose | Plant.type))
-multcomp::cld(emmeans(m1_no3, ~ Dose | Plant.type))
-
-#now what will be the test for treatment and dose test 
-# check residuals to see if transformation needed
-residualPlot(m1_no3)
-qqPlot(m1_no3)
-# test significance
-Anova(m1_no3)
-
-# pairs(emmeans(m1_brayP, ~ Dose | Plant.type))
-multcomp::cld(emmeans(m1_no3, ~ Dose | Plant.type))
-
+# Plot SPAD data with compact letter display (CLD) on the plot
+ggplot(merged_spad, aes(x = Dose, y = SPAD_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", position = "dodge", color = "black") +
+  geom_errorbar(aes(ymin = SPAD_mean - SPAD_se, ymax = SPAD_mean + SPAD_se), width = 0.2, position = position_dodge(0.9), color = "black") +
+  facet_wrap(~ Plant.type) +
+  geom_text(aes(x = Dose, y = SPAD_mean + SPAD_se + 0.05, label = .group), position = position_dodge(0.9), vjust = 0, color = "black") +
+  labs(title = "SPAD (Chlorophyll Content) by Dose, Plant Type, and Fertilizer Type", x = "Dose", y = "SPAD (nmol chlorophyll/mg fresh weight)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) +
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
