@@ -12,13 +12,14 @@ list.files("Modified Data File")
 # Load the dataset
 Plant_traits <- read.csv("Modified Data File/Biomass_height_stem_data_exp1.csv")
 # Load the dataset
-Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
+# Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
 colnames(Plant_traits)
 # Ensure necessary columns are treated as factors
 Plant_traits <- Plant_traits %>%
   mutate(
     Dose = factor(Dose..N.kg.ha., levels = c("0", "100", "200")),  # Convert Dose column to factor
     Fertilizer_Type = factor(Fertilizer.type, levels = c('None', 'MF', 'UF')),                     # Convert Fertilizer.type to Fertilizer_Type
+    Plant.type = case_match(Plant.type, 'L'~'Lucerne', 'P'~'Phalaris'), # rename levels for labelling facets
     Plant.type = factor(Plant.type)                                # Ensure Plant.type is a factor
   )
 Plant_traits %>% 
@@ -60,9 +61,10 @@ biomass_summary_shoot <- biomass_summary %>%
 
 # SHOOT BIOMASS PLOT
 ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve='single'), 
+           colour = "black") +
   geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
-                width = 0.2, position = position_dodge(0.9)) +
+                width=0.2, position = position_dodge(width=0.9)) +
   labs(title = "Shoot Biomass at Harvest Day", x = "Dose (N kg/ha)", 
        y = "Shoot Biomass (g, +/- SE)", fill = 'Fertilizer') +
   facet_wrap(~ Plant.type) +
@@ -70,7 +72,7 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
-            position = position_dodge(0.9))
+            position = position_dodge2(0.9, preserve='single'))
 
 ### ROOT BIOMASS ANALYSIS ###
 # Model for root biomass
