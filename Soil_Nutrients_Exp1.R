@@ -6,9 +6,6 @@ library(emmeans)
 library(ggplot2)
 library(emmeans)
 library(multcomp)
-setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
-list.files()
-
 Soil_Nutrients<- read.csv("Soil_Nutrients_Extraction_EXP1.csv")
 head(Soil_Nutrients)
 
@@ -227,6 +224,77 @@ ggplot(merged_spad, aes(x = Dose, y = SPAD_mean, fill = Fertilizer.type)) +
 
 
 
+
+# Load necessary libraries
+library(emmeans)
+library(ggplot2)
+
+# Assuming the model has been fit previously
+# Fit the model
+m1_spad <- lm(SPAD.Data..nmol.ch.mg.fresh.weight. ~ Dose * Plant.type * Fertilizer.type, data = Soil_Nutrients)
+
+# Perform pairwise comparisons using emmeans
+pairwise_comparisons_spad <- emmeans(m1_spad, ~ Dose | Plant.type | Fertilizer.type)
+
+# Get compact letter display (CLD)
+cld_results <- cld(pairwise_comparisons_spad, Letters = letters, adjust = "tukey")
+
+# Print the compact letter display results
+print(cld_results)
+
+# Check the structure to ensure we have the `.group` column for letter groupings
+str(cld_results)
+# Check the structure of 'cld_results' and 'merged_spad' to make sure they can be merged
+print(str(cld_results))
+print(str(merged_spad))
+
+# Check the structure of cld_results
+print("cld_results structure:")
+str(cld_results)
+
+# Check the structure of merged_spad
+print("merged_spad structure:")
+str(merged_spad)
+
+# Check the first few rows to inspect the columns in cld_results
+print("cld_results preview:")
+head(cld_results)
+
+# Check the first few rows to inspect the columns in merged_spad
+print("merged_spad preview:")
+head(merged_spad)
+# Ensure cld_results is a data frame
+cld_data <- as.data.frame(cld_results)
+
+# Perform the merge based on the common columns (Dose, Plant.type, Fertilizer.type)
+merged_spad <- merge(merged_spad, cld_data[, c("Dose", "Plant.type", "Fertilizer.type", ".group")],
+                     by = c("Dose", "Plant.type", "Fertilizer.type"),
+                     all.x = TRUE)
+
+# Rename .group column to updated_grouping
+names(merged_spad)[names(merged_spad) == ".group"] <- "updated_grouping"
+
+# Check if the grouping letters have been added correctly
+print("Merged data preview:")
+head(merged_spad)
+# Now plot the data with the compact letter display (CLD) on top of the bars
+ggplot(merged_spad, aes(x = factor(Dose), y = SPAD_mean, fill = Fertilizer.type)) + 
+  geom_bar(stat = "identity", 
+           position = position_dodge(width = 0.9), 
+           color = "black", 
+           width = ifelse(merged_spad$Dose == 0, 0.45, 0.7)) +  # Control bar width for Dose 0
+  geom_errorbar(aes(ymin = SPAD_mean - SPAD_se, ymax = SPAD_mean + SPAD_se), 
+                width = 0.2, position = position_dodge(0.9), color = "black") +
+  facet_wrap(~ Plant.type) +
+  geom_text(aes(x = factor(Dose), y = SPAD_mean + SPAD_se + 0.5, label = updated_grouping), 
+            position = position_dodge(0.9), vjust = -0.5, color = "black") +
+  labs(title = "SPAD Data(Chlorophyll Content)", 
+       x = "Dose", y = "SPAD (nmol chlorophyll/mg fresh weight)") +
+  scale_fill_manual(values = c("grey20", "grey50", "grey80")) +  # Set custom colors for Fertilizer type
+  theme_minimal(base_size = 15) +
+  theme(panel.background = element_rect(fill = "white"), 
+        plot.background = element_rect(fill = "white"), 
+        panel.grid.major = element_line(color = "grey"))
 
 
 
