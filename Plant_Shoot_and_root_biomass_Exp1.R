@@ -5,12 +5,6 @@ library(car)
 library(emmeans)
 library(multcomp)
 
-# Set working directory  ## you don't need to do this step when using an RStudio project. Plus the working directory should be the main directory, not the subfolder
-# setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
-list.files("Modified Data File")
-
-# Load the dataset
-Plant_traits <- read.csv("Modified Data File/Biomass_height_stem_data_exp1.csv")
 # Load the dataset
 # Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
 colnames(Plant_traits)
@@ -65,7 +59,7 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
            colour = "black") +
   geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
                 width=0.2, position = position_dodge(width=0.9)) +
-  labs(title = "Shoot Biomass at Harvest Day", x = "Dose (N kg/ha)", 
+  labs(title = "Shoot Biomass 90 days after fertilization(Harvest Day)", x = "Dose (N kg/ha)", 
        y = "Shoot Biomass (g, +/- SE)", fill = 'Fertilizer') +
   facet_wrap(~ Plant.type) +
   scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
@@ -73,6 +67,99 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
             position = position_dodge2(0.9, preserve='single'))
+
+
+
+
+
+# Ensure necessary columns are treated as factors (added by Niraj for bold black color)
+Plant_traits <- Plant_traits %>%
+  mutate(
+    Dose = factor(Dose..N.kg.ha., levels = c("0", "100", "200")),  # Convert Dose column to factor
+    Fertilizer_Type = factor(Fertilizer.type, levels = c('None', 'MF', 'UF')),                     # Convert Fertilizer.type to Fertilizer_Type
+    Plant.type = case_match(Plant.type, 'L' ~ 'Lucerne', 'P' ~ 'Phalaris'), # Rename levels for labelling facets
+    Plant.type = factor(Plant.type)                                # Ensure Plant.type is a factor
+  )
+
+# Group and summarise
+Plant_traits %>% 
+  group_by(Plant.type, Fertilizer_Type, Dose) %>% 
+  summarise(n())
+
+# SHOOT BIOMASS PLOT with bold, black facet labels
+ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = 'single'), 
+           colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
+                width = 0.2, position = position_dodge2(width = 0.9)) +
+  labs(title = "Shoot Biomass 90 days after fertilization (Harvest Day)", 
+       x = "Dose (N kg/ha)", 
+       y = "Shoot Biomass (g, +/- SE)", 
+       fill = 'Fertilizer') +
+  facet_wrap(~ Plant.type) +
+  scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
+  theme_minimal() +
+  geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
+            position = position_dodge2(0.9, preserve = 'single')) +
+  
+  
+  # Adjusting the theme for bold text and making it black
+  theme(
+    axis.title.x = element_text(face = "bold", color = "black", size = 14),
+    axis.title.y = element_text(face = "bold", color = "black", size = 14),
+    axis.text.x = element_text(face = "bold", color = "black", size = 12),
+    axis.text.y = element_text(face = "bold", color = "black", size = 12),
+    plot.title = element_text(face = "bold", color = "black", size = 16, hjust = 0.5),
+    legend.title = element_text(face = "bold", color = "black", size = 12),
+    legend.text = element_text(face = "bold", color = "black", size = 12),
+    strip.text = element_text(face = "bold", color = "black", size = 14)
+  ) +
+  
+  # Add y-axis limit to 50
+  ylim(0, 50) +
+  
+  # Add compact letter display (CLD) text on top of bars
+  geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
+            position = position_dodge2(0.9, preserve = 'single'))  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  # Adjusting the theme for bold text and making it black
+  theme(
+    # Bold the axis titles and make them black
+    axis.title.x = element_text(face = "bold", color = "black", size = 14),
+    axis.title.y = element_text(face = "bold", color = "black", size = 14),
+    
+    # Bold the axis text and make it black
+    axis.text.x = element_text(face = "bold", color = "black", size = 12),
+    axis.text.y = element_text(face = "bold", color = "black", size = 12),
+    
+    # Bold the plot title and make it black
+    plot.title = element_text(face = "bold", color = "black", size = 16, hjust = 0.5),
+    
+    # Bold the legend title and text, make them black
+    legend.title = element_text(face = "bold", color = "black", size = 12),
+    legend.text = element_text(face = "bold", color = "black", size = 12),
+    
+    # Bold and black facet labels (Lucerne, Phalaris)
+    strip.text = element_text(face = "bold", color = "black", size = 14)
+  )
+
+
+
+
 
 ### ROOT BIOMASS ANALYSIS ###
 # Model for root biomass

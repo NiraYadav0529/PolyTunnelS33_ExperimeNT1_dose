@@ -86,3 +86,44 @@ ggplot(spad_summary, aes(x = Dose, y = SPAD_mean, fill = Fertilizer_Type)) +
   theme(panel.border = element_blank(), 
         panel.grid.major = element_line(color = "grey"), 
         panel.grid.minor = element_blank())
+
+
+
+
+
+
+# SPAD PLOT with bold text adjustments and correct bar width for Dose 0
+ggplot(spad_summary, aes(x = Dose, y = SPAD_mean, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", 
+           position = position_dodge(width = 0.8), 
+           colour = "black", show.legend = TRUE, 
+           aes(width = ifelse(Dose == 0, 0.45, 0.7))) +  # Adjust width for Dose 0
+  geom_errorbar(aes(ymin = SPAD_mean - SPAD_se, ymax = SPAD_mean + SPAD_se), 
+                width = 0.2, position = position_dodge(width = 0.8), color = "black") +  # Align error bars
+  labs(title = "SPAD (Chlorophyll Content) 30 days after fertilization", 
+       x = "Dose (N kg/ha)", 
+       y = "SPAD (nmol chlorophyll/mg fresh weight)", 
+       fill = 'Fertilizer') +
+  facet_wrap(~ Plant.type) +
+  scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
+  theme_minimal() +
+  
+  # Adjusting the theme for bold text and making it black
+  theme(
+    axis.title.x = element_text(face = "bold", color = "black", size = 14),
+    axis.title.y = element_text(face = "bold", color = "black", size = 14),
+    axis.text.x = element_text(face = "bold", color = "black", size = 12),
+    axis.text.y = element_text(face = "bold", color = "black", size = 12),
+    plot.title = element_text(face = "bold", color = "black", size = 16, hjust = 0.5),
+    legend.title = element_text(face = "bold", color = "black", size = 12),
+    legend.text = element_text(face = "bold", color = "black", size = 12),
+    strip.text = element_text(face = "bold", color = "black", size = 14)
+  ) +
+  
+  # Add compact letter display (CLD) text on top of bars
+  geom_text(aes(y = SPAD_mean + SPAD_se + 0.5, label = .group), 
+            position = position_dodge(width = 0.8)) +  # Adjust text position
+  # Remove background outlines from the plot
+  theme(panel.border = element_blank(), 
+        panel.grid.major = element_line(color = "grey"), 
+        panel.grid.minor = element_blank())
