@@ -1,0 +1,7 @@
+# Set working directory and load data (adjust the path to your specific environment)
+setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Experiment_2")
+list.files()
+Lucerne_exp2<-read.csv("Lucerne_data-file_Exp2.csv")
+head(Lucerne_exp2)
+Phalaris_exp2<-read.csv("Phalaris_data-file_Exp2.csv")
+head(Phalaris_exp2)
