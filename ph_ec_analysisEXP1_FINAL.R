@@ -315,7 +315,7 @@ pH_plot_90_fixed <- ggplot(pH_summary_90, aes(x = Dose, y = Mean_pH, fill = Fert
            aes(width = ifelse(Dose == 0, 0.45, 0.7))) +  # Adjusting Dose 0 to half the width
   geom_errorbar(aes(ymin = Mean_pH - SE_pH, ymax = Mean_pH + SE_pH), 
                 width = 0.2, position = dodge_position, color = "black") +  # Error bars properly aligned
-  labs(title = "pH 90th Day (Harvest Day)", 
+  labs(title = "pH Harvest Day", 
        x = "Dose (N kg/ha)", 
        y = "pH (+/- SE)", 
        fill = 'Fertilizer') +
@@ -346,7 +346,7 @@ EC_plot_90_fixed <- ggplot(EC_summary_90, aes(x = Dose, y = Mean_EC, fill = Fert
            aes(width = ifelse(Dose == 0, 0.45, 0.7))) +  # Adjusting Dose 0 to half the width
   geom_errorbar(aes(ymin = Mean_EC - SE_EC, ymax = Mean_EC + SE_EC), 
                 width = 0.2, position = dodge_position, color = "black") +  # Error bars properly aligned
-  labs(title = "EC 90th Day (Harvest Day)", 
+  labs(title = "EC Harvest Day", 
        x = "Dose (N kg/ha)", 
        y = "EC (+/- SE)", 
        fill = 'Fertilizer') +

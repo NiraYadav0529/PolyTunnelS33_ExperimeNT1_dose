@@ -93,6 +93,32 @@ ggplot(biomass_summary, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Root + SE_Root + 0.5, label = letters_root), position = position_dodge(0.9), vjust = -0.5)
 
+
+# Root Biomass Plot
+ggplot(biomass_summary, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = 'single'), 
+           colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  labs(title = "Root Biomass at Harvest Day", 
+       x = "Dose (N kg/ha)", 
+       y = "Root Biomass (g, +/- SE)", 
+       fill = 'Fertilizer') +
+  facet_wrap(~ Plant.type, 
+             labeller = as_labeller(c("L" = "Lucerne", "P" = "Phalaris"), 
+                                    default = label_value)) +
+  scale_fill_manual(values = c("UF" = "black", "MF" = "white", "C" = "grey")) +  # Adjust colors as needed
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),  # Center the title
+        strip.text = element_text(face = "bold")) +  # Bold facet labels
+  geom_text(aes(y = Mean_Root + SE_Root + 3, label = letters_root), 
+            position = position_dodge2(0.9, preserve = 'single'))
+
+
+
+
+
 ### Shoot Biomass Plot
 ggplot(biomass_summary, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
@@ -228,4 +254,21 @@ ggplot(traits_summary, aes(x = Dose, y = Mean_Nodules_Count, fill = Fertilizer_T
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Nodules_Count + SE_Nodules_Count + 0.5, label = letters_nodules), position = position_dodge(0.9), vjust = -0.5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

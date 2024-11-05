@@ -84,7 +84,7 @@ Plant_traits <- Plant_traits %>%
 # Group and summarise
 Plant_traits %>% 
   group_by(Plant.type, Fertilizer_Type, Dose) %>% 
-  summarise(n())
+  summarise(n()) 
 
 # SHOOT BIOMASS PLOT with bold, black facet labels
 ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
@@ -195,3 +195,4 @@ ggplot(biomass_summary_root, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Root + SE_Root + 3, label = .group), 
             position = position_dodge(0.9))
+

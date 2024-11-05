@@ -172,3 +172,64 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
   # Add compact letter display (CLD) text on top of bars
   geom_text(aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
             position = position_dodge2(0.9, preserve = 'single'))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Filter data to include only 'Lucerne'
+lucerne_data <- biomass_summary_shoot %>%
+  filter(Plant.type == "Lucerne")
+
+# SHOOT BIOMASS PLOT for Lucerne only with y-axis limit set to 50
+ggplot(lucerne_data, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = 'single'), 
+           colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  labs(
+    title = "Shoot Biomass 30 days after fertilization (Lucerne)", 
+    x = "Dose (N kg/ha)", 
+    y = "Shoot Biomass (g, +/- SE)", 
+    fill = 'Fertilizer'
+  ) +
+  scale_fill_manual(values = c("UF" = "black", "MF" = "white", "None" = "grey")) +
+  theme_minimal() +
+  
+  # Adjusting the theme for bold text and making it black
+  theme(
+    axis.title.x = element_text(face = "bold", color = "black", size = 14),
+    axis.title.y = element_text(face = "bold", color = "black", size = 14),
+    axis.text.x = element_text(face = "bold", color = "black", size = 12, angle = 45, hjust = 1),
+    axis.text.y = element_text(face = "bold", color = "black", size = 12),
+    plot.title = element_text(face = "bold", color = "black", size = 16, hjust = 0.5),
+    legend.title = element_text(face = "bold", color = "black", size = 12),
+    legend.text = element_text(face = "bold", color = "black", size = 12)
+  ) +
+  
+  # Set y-axis limit to 50
+  ylim(0, 50) +
+  
+  # Add compact letter display (CLD) text on top of bars
+  geom_text(
+    aes(y = Mean_Shoot + SE_Shoot + 3, label = .group), 
+    position = position_dodge2(width = 0.9, preserve = 'single')
+  )
