@@ -1,23 +1,26 @@
 # Set working directory and load data
-setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Experiment_2")
+setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
 list.files()
 
 # Load datasets
 Lucerne_exp2 <- read.csv("Lucerne_data-file_Exp2.csv")
+Phalaris_exp2 <- read.csv("Phalaris_data-file_Exp2.csv")
+
+# View the first few rows and column names
 head(Lucerne_exp2)
 colnames(Lucerne_exp2)
-Phalaris_exp2 <- read.csv("Phalaris_data-file_Exp2.csv")
-head(Phalaris_exp2)
 
-# Load necessary libraries
+#LucerneDataset
+
+# Load packages in the recommended order
 library(dplyr)
 library(ggplot2)
 library(car)           # For Anova and residual plots
 library(emmeans)       # For pairwise comparisons
-library(multcompView)  # For compact letter display
-library(stringr)      # For string manipulation
-
-# Convert columns to factors and rename levels where applicable
+library(multcomp)      # For compact letter display with cld()
+library(multcompView)  # Optional for multcomp letters display
+library(stringr)       # For string manipulation
+# Ensure dataset is set up with factor levels
 Lucerne_exp2 <- Lucerne_exp2 %>%
   mutate(
     Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
@@ -32,39 +35,69 @@ biomass_summary <- Lucerne_exp2 %>%
     Mean_Biomass_30 = mean(Fresh.Biomass.gm...30days., na.rm = TRUE),
     SE_Biomass_30 = sd(Fresh.Biomass.gm...30days., na.rm = TRUE) / sqrt(n()),
     Mean_Biomass_56 = mean(Fresh.Biomass..gm._56days_2ndSplitdose, na.rm = TRUE),
-    SE_Biomass_56 = sd(Fresh.Biomass..gm._56days_2ndSplitdose, na.rm = TRUE) / sqrt(n()),
-    .groups = 'drop'  # Prevent warning about grouping in summarise
-  )
+    SE_Biomass_56 = sd(Fresh.Biomass..gm._56days_2ndSplitdose, na.rm = TRUE) / sqrt(n())
+  ) %>%
+  ungroup()  # Make sure data is ungrouped for further operations
 
-# Model for Fresh Biomass at 30 days
-m1_biomass_30 <- lm(Fresh.Biomass.gm...30days. ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
+# Model for log-transformed Fresh Biomass at 30 days
+m1_biomass_30 <- lm(log10(Fresh.Biomass.gm...30days.) ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
 summary(m1_biomass_30)
 
-# Check residuals for 30-day biomass model
-residualPlot(m1_biomass_30)   # Residual plot
-qqPlot(m1_biomass_30)          # Q-Q plot
-Anova(m1_biomass_30, type = "II")
-
-# Model for Fresh Biomass at 56 days
-m1_biomass_56 <- lm(Fresh.Biomass..gm._56days_2ndSplitdose ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
-summary(m1_biomass_56)
-
-# Check residuals for 56-day biomass model
-residualPlot(m1_biomass_56)   # Residual plot
-qqPlot(m1_biomass_56)          # Q-Q plot
-Anova(m1_biomass_56, type = "II")
-
-# Pairwise comparisons for Biomass at 30 days
+# Perform pairwise comparisons
 pairwise_comparisons_30 <- emmeans(m1_biomass_30, ~ Dose * Fertilizer_Type | Application_Method)
-letters_30 <- cld(pairwise_comparisons_30, Letters = letters) %>%
-  mutate(.group = str_trim(.group)) %>%
-  as.data.frame()
+
+# Apply compact letter display with cld
+letters_30 <- cld(pairwise_comparisons_30, Letters = "abc") %>%
+  as.data.frame() %>%
+  mutate(.group = str_trim(.group))
 
 # Pairwise comparisons for Biomass at 56 days
 pairwise_comparisons_56 <- emmeans(m1_biomass_56, ~ Dose * Fertilizer_Type | Application_Method)
 letters_56 <- cld(pairwise_comparisons_56, Letters = letters) %>%
   mutate(.group = str_trim(.group)) %>%
   as.data.frame()
+str(biomass_summary)
+# Summarize Data for Plotting
+biomass_summary_30 <- left_join(
+  biomass_summary %>%
+    select(Dose, Fertilizer_Type, Application_Method, Mean_Biomass_30_days, SE_Biomass_30_days),
+  letters_30,
+  by = c("Dose", "Fertilizer_Type", "Application_Method")
+)
+# Check the structure of both data frames
+str(biomass_summary)
+str(letters_30)
+# Check column names of letters_30
+colnames(letters_30)
+str(biomass_summary)
+str(letters_30)
+install.packages("janitor")
+library(janitor)
+biomass_summary <- biomass_summary %>% clean_names()
+letters_30 <- letters_30 %>% clean_names()
+biomass_summary_30 <- left_join(
+  biomass_summary,
+  letters_30, 
+  by = c("Dose", "Fertilizer_Type", "Application_Method")
+)
+letters_30 <- letters_30 %>%
+  rename(Group = .group)
+
+biomass_summary_30 <- left_join(
+  biomass_summary,
+  letters_30 %>% select(Dose, Fertilizer_Type, Application_Method, Group), 
+  by = c("Dose", "Fertilizer_Type", "Application_Method")
+)
+
+
+# Perform the join with proper selection of columns
+biomass_summary_30 <- left_join(
+  biomass_summary,
+  letters_30 %>% select(Dose, Fertilizer_Type, Application_Method, .group), 
+  by = c("Dose", "Fertilizer_Type", "Application_Method")
+)
+
+
 
 # Summarize Data for Plotting
 biomass_summary_30 <- left_join(biomass_summary %>% select(Dose, Fertilizer_Type, Application_Method, Mean_Biomass_30, SE_Biomass_30),
@@ -92,86 +125,6 @@ ggplot(biomass_summary_56, aes(x = Dose, y = Mean_Biomass_56, fill = Fertilizer_
   labs(title = "Fresh Biomass at 56 Days", x = "Dose (N kg/ha)", y = "Mean Biomass (g/m²)") +
   facet_wrap(~ Application_Method, scales = "free") +
   theme_minimal()
-
-
-
-
-# Calculate mean and standard errors for biomass measurements
-biomass_summary <- Lucerne_exp2 %>%
-  group_by(Dose, Fertilizer_Type, Application_Method) %>%
-  summarise(
-    Mean_Biomass_30 = mean(Fresh.Biomass.gm...30days., na.rm = TRUE),
-    SE_Biomass_30 = sd(Fresh.Biomass.gm...30days., na.rm = TRUE) / sqrt(n()),
-    Mean_Biomass_56 = mean(Fresh.Biomass..gm._56days_2ndSplitdose, na.rm = TRUE),
-    SE_Biomass_56 = sd(Fresh.Biomass..gm._56days_2ndSplitdose, na.rm = TRUE) / sqrt(n()),
-    .groups = 'drop'  # Prevent warning about grouping in summarise
-  )
-
-# Model for Fresh Biomass at 30 days
-m1_biomass_30 <- lm(Fresh.Biomass.gm...30days. ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
-summary(m1_biomass_30)
-
-# Check residuals for 30-day biomass model
-residualPlot(m1_biomass_30)   # Residual plot
-qqPlot(m1_biomass_30)          # Q-Q plot
-Anova(m1_biomass_30, type = "II")
-
-# Model for Fresh Biomass at 56 days
-m1_biomass_56 <- lm(Fresh.Biomass..gm._56days_2ndSplitdose ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
-summary(m1_biomass_56)
-
-# Check residuals for 56-day biomass model
-residualPlot(m1_biomass_56)   # Residual plot
-qqPlot(m1_biomass_56)          # Q-Q plot
-Anova(m1_biomass_56, type = "II")
-
-# Pairwise comparisons for Biomass at 30 days
-pairwise_comparisons_30 <- emmeans(m1_biomass_30, ~ Dose * Fertilizer_Type | Application_Method)
-letters_30 <- cld(pairwise_comparisons_30, Letters = letters) %>%
-  mutate(.group = str_trim(.group)) %>%
-  as.data.frame()
-
-# Pairwise comparisons for Biomass at 56 days
-pairwise_comparisons_56 <- emmeans(m1_biomass_56, ~ Dose * Fertilizer_Type | Application_Method)
-letters_56 <- cld(pairwise_comparisons_56, Letters = letters) %>%
-  mutate(.group = str_trim(.group)) %>%
-  as.data.frame()
-
-# Summarize Data for Plotting
-biomass_summary_30 <- left_join(biomass_summary %>% select(Dose, Fertilizer_Type, Application_Method, Mean_Biomass_30, SE_Biomass_30),
-                                letters_30, by = c("Dose", "Fertilizer_Type", "Application_Method"))
-
-biomass_summary_56 <- left_join(biomass_summary %>% select(Dose, Fertilizer_Type, Application_Method, Mean_Biomass_56, SE_Biomass_56),
-                                letters_56, by = c("Dose", "Fertilizer_Type", "Application_Method"))
-
-# Plot for Fresh Biomass at 30 Days
-ggplot(biomass_summary_30, aes(x = Dose, y = Mean_Biomass_30, fill = Fertilizer_Type)) +
-  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = 'single'), colour = "black") +
-  geom_errorbar(aes(ymin = Mean_Biomass_30 - SE_Biomass_30, ymax = Mean_Biomass_30 + SE_Biomass_30), 
-                width = 0.2, position = position_dodge(width = 0.9)) +
-  geom_text(aes(label = .group), vjust = -0.5, position = position_dodge(0.9)) + 
-  labs(title = "Fresh Biomass at 30 Days", x = "Dose (N kg/ha)", y = "Mean Biomass (g/m²)") +
-  facet_wrap(~ Application_Method, scales = "free") +
-  theme_minimal()
-
-# Plot for Fresh Biomass at 56 Days
-ggplot(biomass_summary_56, aes(x = Dose, y = Mean_Biomass_56, fill = Fertilizer_Type)) +
-  geom_bar(stat = "identity", position = position_dodge2(width = 0.9, preserve = 'single'), colour = "black") +
-  geom_errorbar(aes(ymin = Mean_Biomass_56 - SE_Biomass_56, ymax = Mean_Biomass_56 + SE_Biomass_56), 
-                width = 0.2, position = position_dodge(width = 0.9)) +
-  geom_text(aes(label = .group), vjust = -0.5, position = position_dodge(0.9)) + 
-  labs(title = "Fresh Biomass at 56 Days", x = "Dose (N kg/ha)", y = "Mean Biomass (g/m²)") +
-  facet_wrap(~ Application_Method, scales = "free") +
-  theme_minimal()
-
-
-
-
-
-
-
-
-
 
 
 
