@@ -1,5 +1,5 @@
 # Set working directory and load data
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
+#setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
 list.files()
 
 # Load datasets
@@ -52,8 +52,8 @@ letters_30 <- cld(pairwise_comparisons_30, Letters = "abc") %>%
   mutate(.group = str_trim(.group))
 
 # Pairwise comparisons for Biomass at 56 days
-pairwise_comparisons_56 <- emmeans(m1_biomass_56, ~ Dose * Fertilizer_Type | Application_Method)
-letters_56 <- cld(pairwise_comparisons_56, Letters = letters) %>%
+pairwise_comparisons_56 <- emmeans(m1_biomass_30, ~ Dose * Fertilizer_Type | Application_Method)
+letters_30 <- cld(pairwise_comparisons_56, Letters = letters) %>%
   mutate(.group = str_trim(.group)) %>%
   as.data.frame()
 str(biomass_summary)
