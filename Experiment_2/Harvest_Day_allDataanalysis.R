@@ -8,14 +8,14 @@ library(FactoMineR)
 library(factoextra)
 
 # Load necessary libraries
-library(dplyr)
+library(tidyverse)
 library(ggplot2)
 library(car)
 library(emmeans)
 library(multcompView)
 
 # Set working directory
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
+setwd("Experiment_2")
 
 # Load the dataset
 Lucerne_exp2 <- read.csv("Lucerne_FinalData_analysis.csv", check.names = TRUE)
@@ -36,6 +36,39 @@ Lucerne_exp2 <- Lucerne_exp2 %>%
 
 # Check the transformed dataset
 str(Lucerne_exp2)
+
+
+# example analysis - pH responses over the entire experiment
+tmp <- Lucerne_exp2 %>% 
+  filter(Application_Method == 'Split') %>% 
+  select(Block, Pot.ID, Dose, starts_with('pH')) %>% 
+  pivot_longer(cols=starts_with('pH'), 
+               names_to='Date', values_to='pH') %>% 
+  mutate(Date=factor(Date), 
+         Date=fct_relevel(Date, 'pH_BF'), 
+         Block = as.character(Block)) %>% 
+  filter(pH < 7)
+levels(tmp$Date)
+
+# not accounting for non-independence among replicates
+m1 <- lm(pH ~ Dose * Date, data=tmp)
+plot(m1)
+Anova(m1)
+# effects are significant to visually inspect predictions
+library(ggeffects)
+predict_response(m1, c('Date', 'Dose')) %>% plot()
+# check in more detail using emmeans
+
+
+# accounting for non-indpendence ('repeated measures') - 'mixed effects model'
+library(lme4)
+m1 <- lmer(pH ~ Dose * Date + (1|Block/Pot.ID), data=tmp)
+plot(m1)
+qqPlot(resid(m1))
+Anova(m1, test='F')
+summary(m1)
+predict_response(m1, c('Date', 'Dose')) %>% plot()
+
 
 # Calculate mean and SE for all relevant variables
 summary_lucerne <- Lucerne_exp2 %>%
