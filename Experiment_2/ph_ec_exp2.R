@@ -1,5 +1,13 @@
 #PH FOR PHALARIS ANALYSIS 
 # Convert columns to factors and rename levels where applicable
+# Set working directory and load data
+setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
+list.files()
+
+# Load datasets
+Lucerne_exp2 <- read.csv("Lucerne_data-file_Exp2.csv")
+Phalaris_exp2 <- read.csv("Phalaris_data-file_Exp2.csv")
+
 Phalaris_exp2 <- Phalaris_exp2 %>%
   mutate(
     Dose = factor(Dose...N.kg.ha., levels = c("0", "20", "40", "60", "80", "100", "120")),
