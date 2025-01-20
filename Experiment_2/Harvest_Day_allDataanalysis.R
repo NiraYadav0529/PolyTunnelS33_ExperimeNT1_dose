@@ -114,6 +114,54 @@ summary(m1)
 predict_response(m1, c('Date', 'Dose...N.kg.ha.')) %>% plot()
 
 
+
+
+
+# Check the transformed dataset
+str(Lucerne_exp2)
+
+
+# example analysis - DRyBiomass  responses over the entire experiment (Jeff Code)
+tmp <- Lucerne_exp2 %>% 
+  filter(Application_method == 'Split') %>% 
+  select(Block, Pot.ID, Dose...N.kg.ha., starts_with('Dry')) %>% 
+  pivot_longer(cols=starts_with('Dry'), 
+               names_to='Date', values_to='Dry') %>% 
+  mutate(Date=factor(Date), 
+         Date=fct_relevel(Date, 'Dry_Biomass_1'), 
+         Block = as.character(Block)) %>% 
+  filter( Dry< 20)
+levels(tmp$Date)
+
+# not accounting for non-independence among replicates
+m1 <- lm(Dry ~ Dose...N.kg.ha. * Date, data=tmp)
+plot(m1)
+Anova(m1)
+install.packages("insight")  # Replace "insight" with the actual package name
+library(insight)
+
+# effects are significant to visually inspect predictions
+library(ggeffects)
+predict_response(m1, c('Date', 'Dose...N.kg.ha.')) %>% plot()
+# check in more detail using emmeans
+
+
+# accounting for non-indpendence ('repeated measures') - 'mixed effects model'
+library(lme4)
+m1 <- lmer(Dry ~ Dose...N.kg.ha. * Date + (1|Block/Pot.ID), data=tmp)
+plot(m1)
+qqPlot(resid(m1))
+Anova(m1, test='F')
+summary(m1)
+predict_response(m1, c('Date', 'Dose...N.kg.ha.')) %>% plot()
+
+
+
+ 
+
+
+
+
 # Calculate mean and SE for all relevant variables
 summary_lucerne <- Lucerne_exp2 %>%
   group_by(Dose, Fertilizer_Type, Application_Method) %>%
