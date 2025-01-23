@@ -6,6 +6,7 @@ library(emmeans)
 library(ggplot2)
 library(emmeans)
 library(multcomp)
+setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Modified Data File")
 Soil_Nutrients<- read.csv("Soil_Nutrients_Extraction_EXP1.csv")
 head(Soil_Nutrients)
 
