@@ -157,7 +157,189 @@ predict_response(m1, c('Date', 'Dose...N.kg.ha.')) %>% plot()
 
 
 
- 
+
+
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(emmeans)
+library(forcats)
+
+# Convert variables to factors
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(
+    Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
+    Fertilizer_Type = factor(Fertilizer.type, levels = c("None", "MF", "UF")),
+    Application_Method = factor(Application_method, levels = c("One-time", "Split"))
+  )
+
+# Filter only rows with Application_Method == "Split"
+split_data <- Lucerne_exp2 %>%
+  filter(Application_Method == "Split") %>%
+  select(
+    Block,
+    Pot.ID,
+    Plant.type,
+    Dose,
+    Fertilizer_Type,
+    Application_Method,
+    Dry_Biomass_1,
+    Dry_Biomass._2,
+    Dry_Biomass_3,
+    Dry_Biomass_root_118days
+  ) %>%
+  pivot_longer(
+    cols = c(Dry_Biomass_1, Dry_Biomass._2, Dry_Biomass_3, Dry_Biomass_root_118days),
+    names_to = "Time_Point",
+    values_to = "Dry_Biomass"
+  ) %>%
+  mutate(
+    Time_Point = factor(Time_Point),
+    Block = as.character(Block)
+  ) %>%
+  drop_na(Dry_Biomass)  # Remove rows with missing Dry_Biomass values
+
+# Check the structure of the reshaped data
+str(split_data)
+
+# Visualize data distribution
+ggplot(split_data, aes(x = Time_Point, y = Dry_Biomass, color = Fertilizer_Type)) +
+  geom_boxplot() +
+  facet_grid(cols = vars(Dose)) +
+  theme_minimal() +
+  labs(title = "Dry Biomass Distribution by Time Point (Split Only)", y = "Dry Biomass", x = "Time Point")
+
+# Visualize data distribution for Split method with Dose as legend
+ggplot(split_data, aes(x = Time_Point, y = Dry_Biomass, color = Dose)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Dry Biomass Distribution by Time Point (Split Only)",
+    y = "Dry Biomass",
+    x = "Time Point",
+    color = "Dose (N kg/ha)"
+  ) +
+  theme(legend.position = "right")  # Ensure legend is on the right
+
+
+
+# Fit a linear mixed-effects model
+m1_split <- lmer(Dry_Biomass ~ Time_Point * Dose * Fertilizer_Type + (1 | Block/Pot.ID), data = split_data)
+
+# Check model summary and diagnostics
+summary(m1_split)
+plot(m1_split)
+qqnorm(resid(m1_split))
+qqline(resid(m1_split))
+
+# Perform ANOVA to test fixed effects
+Anova(m1_split, test = "F")
+library(emmeans)
+library(multcomp)
+library(multcompView)
+# Pairwise comparisons and significance letters
+emmeans_split <- emmeans(m1_split, ~ Time_Point * Dose * Fertilizer_Type)
+letters_split <- cld(emmeans_split, adjust = "tukey", Letters = letters)
+print(letters_split)
+
+
+
+
+
+
+# Visualize model predictions
+pred_split <- ggpredict(m1_split, terms = c("Time_Point", "Dose", "Fertilizer_Type"))
+ggplot(pred_split, aes(x = x, y = predicted, color = group)) +
+  geom_line(size = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+  labs(x = "Time Point", y = "Predicted Dry Biomass", title = "Dry Biomass Predictions (Split Only)") +
+  theme_minimal()
+
+# Visualize significance letters
+results_split <- as.data.frame(letters_split)
+ggplot(results_split, aes(x = Time_Point, y = emmean, fill = Fertilizer_Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = .group), position = position_dodge(0.9), vjust = -0.5) +
+  labs(y = "Estimated Mean Dry Biomass", x = "Time Point", title = "Significance Letters for Dry Biomass (Split Only)") +
+  theme_classic()
+
+
+
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lme4)
+library(emmeans)
+
+# Ensure data is structured properly with both application methods
+comparison_data <- Lucerne_exp2 %>%
+  select(
+    Block,
+    Pot.ID,
+    Plant.type,
+    Dose,
+    Fertilizer_Type,
+    Application_Method,
+    Dry_Biomass_1,
+    Dry_Biomass._2,
+    Dry_Biomass_3,
+    Dry_Biomass_root_118days
+  ) %>%
+  pivot_longer(
+    cols = c(Dry_Biomass_1, Dry_Biomass._2, Dry_Biomass_3, Dry_Biomass_root_118days),
+    names_to = "Time_Point",
+    values_to = "Dry_Biomass"
+  ) %>%
+  mutate(
+    Time_Point = factor(Time_Point),
+    Block = as.character(Block)
+  ) %>%
+  drop_na(Dry_Biomass)  # Remove rows with missing Dry_Biomass values
+
+# Visualize data distribution for both application methods
+ggplot(comparison_data, aes(x = Time_Point, y = Dry_Biomass, fill = Application_Method)) +
+  geom_boxplot() +
+  facet_wrap(~ Dose) +
+  theme_minimal() +
+  labs(
+    title = "Dry Biomass Distribution by Time Point and Application Method",
+    y = "Dry Biomass",
+    x = "Time Point",
+    fill = "Application Method"
+  ) +
+  theme(legend.position = "right")
+
+# Fit a linear mixed-effects model to compare application methods
+m1 <- lmer(Dry_Biomass ~ Time_Point * Dose * Application_Method + (1 | Block/Pot.ID), data = comparison_data)
+
+# Model summary
+summary(m1)
+
+# Perform ANOVA to test fixed effects
+anova_results <- Anova(m1, test = "F")
+print(anova_results)
+
+# Pairwise comparisons for Application_Method
+emmeans_results <- emmeans(m1, ~ Application_Method | Time_Point * Dose)
+pairs(emmeans_results)
+
+# Visualize predictions
+pred <- ggpredict(m1, terms = c("Time_Point", "Application_Method", "Dose"))
+ggplot(pred, aes(x = x, y = predicted, color = group)) +
+  geom_line(size = 1) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+  labs(
+    title = "Predicted Dry Biomass by Application Method and Time Point",
+    x = "Time Point",
+    y = "Predicted Dry Biomass",
+    color = "Application Method",
+    fill = "Application Method"
+  ) +
+  theme_minimal()
+
 
 
 

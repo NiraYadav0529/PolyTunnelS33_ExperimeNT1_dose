@@ -289,6 +289,7 @@ grid.arrange(plot_nh4, plot_no3, plot_p, nrow = 3)
 
 
 
+
 FinalData_EXP1 <-read.csv("Final_Data_for analysis_Experiment1.csv")
 colnames(FinalData_EXP1)
 # Load required libraries
@@ -394,6 +395,69 @@ plot_po4_leachate <- ggplot(Leachates_data, aes(x = interaction(fertilizer, dose
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 # Arrange plots in a grid
 grid.arrange(plot_nh4_leachate, plot_no3_leachate, plot_po4_leachate, nrow = 3)
+
+# NH4 Leachates - Boxplot
+plot_nh4_leachate <- ggplot(Leachates_data, aes(x = interaction(fertilizer, dose), y = nh4_leachate, fill = interaction(fertilizer, dose))) +
+  geom_boxplot(outlier.size = 1, outlier.shape = 21, colour = "black", alpha = 0.7) +
+  facet_wrap(~plant_species, ncol = 2) +
+  scale_fill_manual(values = c(
+    "None 0" = "white",    # White for "None" fertilizer with "0" dose
+    "MF 100" = "grey70",   # Light grey for "MF" with "100"
+    "MF 200" = "grey50",   # Darker grey for "MF" with "200"
+    "UF 100" = "black",    # Black for "UF" with "100"
+    "UF 200" = "grey20"    # Very dark grey for "UF" with "200"
+  )) +
+  theme_minimal() +
+  labs(title = "NH4 Leachates", x = "Fertilizer and Dose", y = "NH4 (mg N/L)") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold")
+  )
+
+# NO3 Leachates - Boxplot
+plot_no3_leachate <- ggplot(Leachates_data, aes(x = interaction(fertilizer, dose), y = no3_leachate, fill = interaction(fertilizer, dose))) +
+  geom_boxplot(outlier.size = 1, outlier.shape = 21, colour = "black", alpha = 0.7) +
+  facet_wrap(~plant_species, ncol = 2) +
+  scale_fill_manual(values = c(
+    "None 0" = "white",    # White for "None" fertilizer with "0" dose
+    "MF 100" = "grey70",   # Light grey for "MF" with "100"
+    "MF 200" = "grey50",   # Darker grey for "MF" with "200"
+    "UF 100" = "black",    # Black for "UF" with "100"
+    "UF 200" = "grey20"    # Very dark grey for "UF" with "200"
+  )) +
+  theme_minimal() +
+  labs(title = "NO3 Leachates", x = "Fertilizer and Dose", y = "NO3 (mg N/L)") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold")
+  )
+
+# PO4 Leachates - Boxplot
+plot_po4_leachate <- ggplot(Leachates_data, aes(x = interaction(fertilizer, dose), y = po4_leachate, fill = interaction(fertilizer, dose))) +
+  geom_boxplot(outlier.size = 1, outlier.shape = 21, colour = "black", alpha = 0.7) +
+  facet_wrap(~plant_species, ncol = 2) +
+  scale_fill_manual(values = c(
+    "None 0" = "white",    # White for "None" fertilizer with "0" dose
+    "MF 100" = "grey70",   # Light grey for "MF" with "100"
+    "MF 200" = "grey50",   # Darker grey for "MF" with "200"
+    "UF 100" = "black",    # Black for "UF" with "100"
+    "UF 200" = "grey20"    # Very dark grey for "UF" with "200"
+  )) +
+  theme_minimal() +
+  labs(title = "PO4 Leachates", x = "Fertilizer and Dose", y = "PO4 (mg N/L)") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold")
+  )
+
+# Arrange plots in a grid
+library(gridExtra)
+grid.arrange(plot_nh4_leachate, plot_no3_leachate, plot_po4_leachate, nrow = 3)
+
+
 
 
 
@@ -1287,3 +1351,18 @@ ggplot(shoot_root_data, aes(x = Roots_P, y = Shoot_P, color = Fertilizer_Type)) 
 
 
 colnames(FinalData_EXP1)
+
+
+
+# Perform Tukey's HSD for NH4 leachates
+tukey_nh4 <- TukeyHSD(anova_nh4_leachate)
+
+
+
+
+
+
+
+
+
+

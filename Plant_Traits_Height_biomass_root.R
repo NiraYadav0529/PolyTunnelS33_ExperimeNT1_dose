@@ -74,7 +74,7 @@ ggplot(biomass_summary, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Type)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
   geom_errorbar(aes(ymin = Mean_Shoot - SE_Shoot, ymax = Mean_Shoot + SE_Shoot), 
                 width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Shoot Biomass by Dose and Fertilizer Type", x = "Dose", y = "Shoot Biomass (gm)") +
+  labs(title = "Fresh Shoot Biomass at Harvest Day", x = "Dose", y = "Shoot Biomass (gm)") +
   facet_wrap(~ Plant.type) +
   scale_fill_manual(values = c("UF" = "red", "MF" = "blue", "C" = "green")) +
   theme_minimal() +
@@ -86,7 +86,7 @@ ggplot(biomass_summary, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black", alpha = 0.5) +
   geom_errorbar(aes(ymin = Mean_Root - SE_Root, ymax = Mean_Root + SE_Root), 
                 width = 0.2, position = position_dodge(0.9)) +
-  labs(title = "Root Biomass by Dose and Fertilizer Type", x = "Dose", y = "Root Biomass (gm)") +
+  labs(title = "Fresh Root Biomass at Harvest Day", x = "Dose", y = "Root Biomass (gm)") +
   facet_wrap(~ Plant.type) +
   scale_fill_manual(values = c("UF" = "red", "MF" = "blue", "C" = "green")) +
   theme_minimal() +
@@ -147,8 +147,79 @@ ggplot(biomass_summary, aes(x = Dose, y = Mean_Root, fill = Fertilizer_Type)) +
 
 
 
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
 
+# Reshape data to long format
+biomass_long <- Plant_traits %>%
+  select(Plant.type, Fertilizer.type, Dose..N.kg.ha., 
+         Fresh_biomass_BF..gm., Fresh_biomass_AF_30days.gm., Fresh.Biomass_harvestday..gm.) %>%
+  pivot_longer(
+    cols = c(Fresh_biomass_BF..gm., Fresh_biomass_AF_30days.gm., Fresh.Biomass_harvestday..gm.),
+    names_to = "Time",
+    values_to = "Biomass"
+  ) %>%
+  mutate(
+    Dose = factor(Dose..N.kg.ha., levels = c("0", "100", "200")),
+    Fertilizer_Type = factor(Fertilizer.type),
+    Plant.type = factor(Plant.type),
+    Time = factor(Time, 
+                  levels = c("Fresh_biomass_BF..gm.", "Fresh_biomass_AF_30days.gm.", "Fresh.Biomass_harvestday..gm."),
+                  labels = c("Before Fertilization", "After 30 Days", "Harvest Day"))
+  )
+# Calculate mean and SE for each group
+biomass_summary <- biomass_long %>%
+  group_by(Time, Dose, Plant.type, Fertilizer_Type) %>%
+  summarise(
+    Mean_Biomass = mean(Biomass, na.rm = TRUE),
+    SE_Biomass = sd(Biomass, na.rm = TRUE) / sqrt(n())
+  )
+# Perform ANOVA
+anova_result <- aov(Biomass ~ Time * Dose * Fertilizer_Type * Plant.type, data = biomass_long)
+summary(anova_result)
 
+# Tukey's HSD test
+library(agricolae)
+tukey_result <- HSD.test(anova_result, "Time", group = TRUE)
+
+# Assign Tukey's letters
+letters <- tukey_result$groups
+letters <- letters[order(rownames(letters)), ]  # Ensure correct ordering
+letters$Time <- rownames(letters)  # Add Time column
+# Merge Tukey letters with biomass summary
+biomass_summary <- biomass_summary %>%
+  left_join(letters, by = "Time") %>%
+  rename(Significance = groups)
+ggplot(biomass_summary, aes(x = Time, y = Mean_Biomass, fill = Dose)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Biomass - SE_Biomass, ymax = Mean_Biomass + SE_Biomass),
+                width = 0.2, position = position_dodge(0.9)) +
+  facet_wrap(~ Fertilizer_Type * Plant.type) +
+  geom_text(aes(y = Mean_Biomass + SE_Biomass + 0.1, label = Significance), 
+            position = position_dodge(0.9), vjust = -0.5) +
+  labs(title = "Biomass at Different Time Points", x = "Time", y = "Biomass (gm)", fill = "Dose (N kg/ha)") +
+  scale_fill_manual(values = c("0" = "orange", "100" = "purple", "200" = "green")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(biomass_summary, aes(x = Time, y = Mean_Biomass, fill = Dose)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.9), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Biomass - SE_Biomass, ymax = Mean_Biomass + SE_Biomass),
+                width = 0.2, position = position_dodge(0.9)) +
+  facet_grid(Plant.type ~ Fertilizer_Type) +
+  geom_text(aes(y = Mean_Biomass + SE_Biomass + 0.5, label = Significance), 
+            position = position_dodge(0.9), vjust = -0.5) +
+  labs(title = "Biomass at Different Time Points by Plant Species", 
+       x = "Time", y = "Biomass (gm)", fill = "Dose (N kg/ha)") +
+  scale_fill_manual(values = c("0" = "orange", "100" = "purple", "200" = "green")) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text.y = element_text(face = "bold", size = 12),
+    strip.text.x = element_text(face = "bold", size = 12)
+  )
 
 
 
@@ -254,8 +325,6 @@ ggplot(traits_summary, aes(x = Dose, y = Mean_Nodules_Count, fill = Fertilizer_T
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_text(aes(y = Mean_Nodules_Count + SE_Nodules_Count + 0.5, label = letters_nodules), position = position_dodge(0.9), vjust = -0.5)
-
-
 
 
 

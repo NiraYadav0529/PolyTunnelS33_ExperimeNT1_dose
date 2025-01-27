@@ -1061,3 +1061,234 @@ print(CO2_trend_plot_bordered)
 N2O_trend_plot_bordered <- plot_flux_trend_with_borders(GHZs_Data_longer, "N2O")
 print(N2O_trend_plot_bordered)
 
+
+
+
+
+
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(agricolae)
+colnames(GHZs_Data)
+
+
+# Reshape GHZs_Data to long format for analysis
+ghz_long <- GHZs_Data %>%
+  dplyr::select(`Plant.type`, `Fertilizer_Type`, `Dose..N.kg.ha.`, 
+                `BF.flux..umol.min.m2.`, `AF_1stday_flux..umol.min.m2.`, 
+                `AF_3rdday_flux..umol.min.m2.`, `AF_5thday_flux..umol.min.m2.`, 
+                `AF_7thday_flux..umol.min.m2.`) %>%
+  pivot_longer(
+    cols = c(`BF.flux..umol.min.m2.`, `AF_1stday_flux..umol.min.m2.`, 
+             `AF_3rdday_flux..umol.min.m2.`, `AF_5thday_flux..umol.min.m2.`, 
+             `AF_7thday_flux..umol.min.m2.`),
+    names_to = "Time",
+    values_to = "Flux"
+  ) %>%
+  mutate(
+    Dose = factor(`Dose..N.kg.ha.`, levels = c("100", "200")),  # Convert Dose to factor
+    Fertilizer_Type = factor(`Fertilizer_Type`),               # Convert Fertilizer_Type to factor
+    Plant.type = factor(`Plant.type`),                        # Convert Plant.type to factor
+    Time = factor(Time,  # Rename and order time points
+                  levels = c("BF.flux..umol.min.m2.", "AF_1stday_flux..umol.min.m2.", 
+                             "AF_3rdday_flux..umol.min.m2.", "AF_5thday_flux..umol.min.m2.", 
+                             "AF_7thday_flux..umol.min.m2."),
+                  labels = c("Before Fertilization", "1st Day", "3rd Day", "5th Day", "7th Day"))
+  )
+str(ghz_long)
+head(ghz_long)
+# Calculate mean and SE for each group
+ghz_summary <- ghz_long %>%
+  group_by(Time, Dose, Plant.type, Fertilizer_Type) %>%
+  summarise(
+    Mean_Flux = mean(Flux, na.rm = TRUE),
+    SE_Flux = sd(Flux, na.rm = TRUE) / sqrt(n())
+  ) %>%
+  ungroup()
+
+# Check summary
+head(ghz_summary)
+# Fit ANOVA model
+anova_result_ghz <- aov(Flux ~ Time * Dose * Fertilizer_Type * Plant.type, data = ghz_long)
+summary(anova_result_ghz)
+
+# Perform Tukey's HSD test for pairwise comparisons
+library(agricolae)
+tukey_ghz <- HSD.test(anova_result_ghz, "Time", group = TRUE)
+
+# Extract Tukey's groups (letters)
+tukey_letters <- tukey_ghz$groups
+tukey_letters <- tukey_letters[order(rownames(tukey_letters)), ]  # Ensure correct ordering
+tukey_letters$Time <- rownames(tukey_letters)  # Add Time column
+
+# Merge Tukey letters with summary data
+ghz_summary <- ghz_summary %>%
+  left_join(tukey_letters, by = "Time") %>%
+  rename(Significance = groups)
+
+# Check merged summary
+head(ghz_summary)
+# Create the plot
+ggplot(ghz_summary, aes(x = Time, y = Mean_Flux, fill = Dose)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), colour = "black") +
+  geom_errorbar(aes(ymin = Mean_Flux - SE_Flux, ymax = Mean_Flux + SE_Flux), 
+                position = position_dodge(width = 0.8), width = 0.2, colour = "black") +
+  geom_text(aes(y = Mean_Flux + SE_Flux + 0.1, label = Significance),
+            position = position_dodge(width = 0.8), vjust = -0.5, size = 3.5) +
+  facet_wrap(~ Fertilizer_Type * Plant.type) +
+  labs(title = "GHZ Flux Across Different Time Points", 
+       x = "Time (Days)", y = "Flux (umol/min/m²)", fill = "Dose (N kg/ha)") +
+  scale_fill_manual(values = c("100" = "purple", "200" = "green")) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 14),
+    strip.text = element_text(face = "bold", size = 12),
+    plot.title = element_text(face = "bold", size = 16, hjust = 0.5)
+  )
+
+
+
+
+
+
+
+# Reshape GHZs_Data to long format including Test.Name
+ghz_long <- GHZs_Data %>%
+  dplyr::select(Plant.type, Fertilizer_Type, Dose..N.kg.ha., Test.Name, 
+                BF.flux..umol.min.m2., AF_1stday_flux..umol.min.m2., 
+                AF_3rdday_flux..umol.min.m2., AF_5thday_flux..umol.min.m2., 
+                AF_7thday_flux..umol.min.m2.) %>%
+  pivot_longer(
+    cols = starts_with("BF") | starts_with("AF"),
+    names_to = "Time",
+    values_to = "Flux"
+  ) %>%
+  mutate(
+    Dose = factor(Dose..N.kg.ha., levels = c("100", "200")),  # Convert Dose to factor
+    Fertilizer_Type = factor(Fertilizer_Type),  # Convert Fertilizer_Type to factor
+    Plant.type = factor(Plant.type),  # Convert Plant.type to factor
+    Time = factor(Time,  # Rename and order time points
+                  levels = c("BF.flux..umol.min.m2.", "AF_1stday_flux..umol.min.m2.", 
+                             "AF_3rdday_flux..umol.min.m2.", "AF_5thday_flux..umol.min.m2.", 
+                             "AF_7thday_flux..umol.min.m2."),
+                  labels = c("Before Fertilization", "1st Day", "3rd Day", "5th Day", "7th Day")),
+    Test.Name = factor(Test.Name)  # Convert Test.Name to factor
+  )
+# Calculate mean and SE for each group by Test.Name
+ghz_summary <- ghz_long %>%
+  group_by(Test.Name, Time, Dose, Plant.type, Fertilizer_Type) %>%
+  summarise(
+    Mean_Flux = mean(Flux, na.rm = TRUE),
+    SE_Flux = sd(Flux, na.rm = TRUE) / sqrt(n())
+  ) %>%
+  ungroup()
+# Initialize an empty list to store Tukey results
+tukey_results <- list()
+
+# Loop through each Test.Name
+unique_tests <- unique(ghz_long$Test.Name)
+for (test in unique_tests) {
+  # Subset data for the current test
+  test_data <- ghz_long %>% filter(Test.Name == test)
+  
+  # Fit ANOVA model
+  anova_result <- aov(Flux ~ Time * Dose * Fertilizer_Type * Plant.type, data = test_data)
+  
+  # Perform Tukey's HSD test for Time
+  tukey <- HSD.test(anova_result, "Time", group = TRUE)
+  
+  # Store Tukey results with Test.Name
+  tukey_results[[test]] <- tukey$groups %>%
+    as.data.frame() %>%
+    mutate(Time = rownames(.), Test.Name = test)
+}
+
+# Combine Tukey results into one data frame
+tukey_letters <- bind_rows(tukey_results)
+
+# Merge Tukey letters with the summary data
+ghz_summary <- ghz_summary %>%
+  left_join(tukey_letters, by = c("Test.Name", "Time")) %>%
+  rename(Significance = groups)
+library(ggplot2)
+
+
+library(ggplot2)
+library(dplyr)
+
+# Reorder the `Time` factor for consistent x-axis ordering
+ghz_summary <- ghz_summary %>%
+  mutate(Time = factor(Time, levels = c("Before Fertilization", "1st Day", "3rd Day", "5th Day", "7th Day")))
+
+# Line plot with error bars and Tukey letters
+ggplot(ghz_summary, aes(x = Time, y = Mean_Flux, group = interaction(Fertilizer_Type, Dose), color = Dose, linetype = Fertilizer_Type)) +
+  geom_line(position = position_dodge(width = 0.5), size = 1) +  # Line for each Dose and Fertilizer_Type
+  geom_errorbar(aes(ymin = Mean_Flux - SE_Flux, ymax = Mean_Flux + SE_Flux), 
+                width = 0.2, position = position_dodge(width = 0.5)) +  # Error bars
+  geom_point(size = 3, position = position_dodge(width = 0.5)) +  # Points at data points
+  geom_text(aes(y = Mean_Flux + SE_Flux + 0.2, label = Significance), 
+            position = position_dodge(width = 0.5), size = 3, vjust = -0.5) +  # Tukey letters
+  facet_wrap(~ Test.Name, ncol = 3, scales = "free_y") +  # Facet by Test.Name, 3 columns
+  labs(
+    title = "GHZ Flux Across Different Time Points by Test",
+    x = "Time (Days)", 
+    y = "Flux (umol/min/m²)", 
+    color = "Dose (N kg/ha)", 
+    linetype = "Fertilizer Type"
+  ) +
+  scale_color_manual(values = c("100" = "purple", "200" = "green")) +  # Colors for doses
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 14),
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    strip.text = element_text(face = "bold", size = 12),
+    panel.grid.major = element_line(colour = "grey90"),
+    panel.grid.minor = element_blank()
+  )
+
+
+library(ggplot2)
+library(dplyr)
+
+ggplot(ghz_summary, aes(x = Time, y = Mean_Flux, group = interaction(Dose, Fertilizer_Type), 
+                        color = Dose)) +
+  geom_line(size = 1) +  # Add lines
+  geom_point(size = 3, shape = 21, fill = "white") +  # Add points
+  geom_errorbar(aes(ymin = Mean_Flux - SE_Flux, ymax = Mean_Flux + SE_Flux), 
+                width = 0.2, size = 0.8) +  # Error bars
+  geom_text(aes(y = Mean_Flux + SE_Flux + 0.1, label = Significance), 
+            size = 3, vjust = -0.5, fontface = "bold") +  # Tukey letters
+  facet_grid(rows = vars(Fertilizer_Type, Dose), cols = vars(Test.Name), scales = "free_y") +  # Free y-scales
+  scale_color_manual(
+    values = c("100" = "#377eb8", "200" = "#e41a1c"), 
+    labels = c("100" = "100 kg/ha", "200" = "200 kg/ha")
+  ) +  # Colors for doses
+  labs(
+    title = "GHZ Flux Across Different Time Points by Test, Fertilizer Type, and Dose",
+    x = "Timepoint (Days)",
+    y = "Flux (umol/min/m²)",
+    color = "Dose (kg/ha)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    axis.title.x = element_text(face = "bold", size = 14),
+    axis.title.y = element_text(face = "bold", size = 14),
+    plot.title = element_text(face = "bold", hjust = 0.5, size = 16),
+    strip.text = element_text(face = "bold", size = 12),
+    legend.title = element_text(face = "bold"),
+    legend.text = element_text(face = "bold"),
+    panel.grid.major = element_line(colour = "grey80"),
+    panel.grid.minor = element_blank()
+  )
