@@ -1,0 +1,71 @@
+[Header]	
+System	TOC_TN	
+S/W Version	1.00	
+User	Niraj 	
+Date/Time	14/12/2023 11:15:17 AM	
+Comments		
+
+[System]	
+Instrument Options	TOC/ASI/IC Unit/TN/Sparge Kit/	
+
+[Data]	
+Type	Anal.	Sample Name	Sample ID	Result(TOC)	Result(TC)	Result(IC)	Result(POC)	Result(NPOC)	Result(TN)	Unit	Vial	Date / Time	
+Unknown	TC/TN		blank		0.07039				0.000	mg/L	1	13/12/2023 1:14:29 PM	
+Unknown	TC/TN		blank		0.07336				0.000	mg/L	1	13/12/2023 1:22:10 PM	
+Unknown	TC/TN		blank		0.07711				0.000	mg/L	1	13/12/2023 1:29:51 PM	
+Standard	TC	TC Standards	TC Standards		100.0					mg/L	2, 3, 3, 3, 3, 3	13/12/2023 2:55:24 PM	
+Standard	TN	TN calibration std 50	TN Standards						50.00	mg/L	4, 5, 5, 5, 5, 5	13/12/2023 4:23:55 PM	
+Unknown	TC/TN		blank		0.2191				0.000	mg/L	6	13/12/2023 4:35:38 PM	
+Unknown	TC/TN		tc50		55.30				0.000	mg/L	7	13/12/2023 4:53:56 PM	
+Unknown	TC/TN		tn25		0.6842				21.40	mg/L	8	13/12/2023 5:11:27 PM	
+Unknown	TC/TN		B18F		153.6				6.787	mg/L	9	13/12/2023 5:27:19 PM	
+Unknown	TC/TN		B18NF		12.59				6.590	mg/L	10	13/12/2023 5:40:00 PM	
+Unknown	TC/TN		B13F		11.01				1.771	mg/L	11	13/12/2023 5:56:05 PM	
+Unknown	TC/TN		B25F		190.1				6.725	mg/L	12	13/12/2023 6:12:31 PM	
+Unknown	TC/TN		B13F		163.7				11.28	mg/L	13	13/12/2023 6:26:14 PM	
+Unknown	TC/TN		B21NF		13.74				2.221	mg/L	14	13/12/2023 6:43:26 PM	
+Unknown	TC/TN		B15F		156.2				19.59	mg/L	15	13/12/2023 6:57:36 PM	
+Unknown	TC/TN		B14F		219.2				16.49	mg/L	16	13/12/2023 7:11:46 PM	
+Unknown	TC/TN		B23NF		10.42				1.878	mg/L	17	13/12/2023 7:27:54 PM	
+Unknown	TC/TN		B22F		176.0				8.311	mg/L	18	13/12/2023 7:41:53 PM	
+Unknown	TC/TN		B10NF		20.20				336.3	mg/L	19	13/12/2023 8:00:10 PM	
+Unknown	TC/TN		B21F		205.3				13.15	mg/L	20	13/12/2023 8:18:02 PM	
+Unknown	TC/TN		B12NF		10.72				3.196	mg/L	21	13/12/2023 8:31:21 PM	
+Unknown	TC/TN		B12F		153.2				13.20	mg/L	22	13/12/2023 8:45:27 PM	
+Unknown	TC/TN		B3NF		11.18				6.758	mg/L	23	13/12/2023 8:57:55 PM	
+Unknown	TC/TN		B5NF		12.90				20.75	mg/L	24	13/12/2023 9:11:15 PM	
+Unknown	TC/TN		blank		0.2482				0.000	mg/L	6	13/12/2023 9:20:46 PM	
+Unknown	TC/TN		tc50		47.64				0.000	mg/L	7	13/12/2023 9:34:36 PM	
+Unknown	TC/TN		tn25		0.5892				30.84	mg/L	8	13/12/2023 9:52:46 PM	
+Unknown	TC/TN		B19NF		11.67				3.938	mg/L	25	13/12/2023 10:08:30 PM	
+Unknown	TC/TN		B10F		129.8				414.8	mg/L	26	13/12/2023 10:31:51 PM	
+Unknown	TC/TN		B7F		164.4				420.9	mg/L	27	13/12/2023 10:50:18 PM	
+Unknown	TC/TN		B4NF		12.55				17.03	mg/L	28	13/12/2023 11:11:21 PM	
+Unknown	TC/TN		B5F		164.5				28.71	mg/L	29	13/12/2023 11:26:44 PM	
+Unknown	TC/TN		B6F		110.9				254.8	mg/L	30	13/12/2023 11:45:08 PM	
+Unknown	TC/TN		B2F		143.0				13.71	mg/L	31	14/12/2023 12:03:55 AM	
+Unknown	TC/TN		B1F		119.0				9.452	mg/L	32	14/12/2023 12:20:12 AM	
+Unknown	TC/TN		B19F		151.4				13.40	mg/L	33	14/12/2023 12:32:52 AM	
+Unknown	TC/TN		B20F		134.9				8.145	mg/L	34	14/12/2023 12:45:36 AM	
+Unknown	TC/TN		B8F		128.2				29.71	mg/L	35	14/12/2023 1:01:57 AM	
+Unknown	TC/TN		B7NF		21.10				342.2	mg/L	36	14/12/2023 1:20:21 AM	
+Unknown	TC/TN		B9F		120.1				460.0	mg/L	37	14/12/2023 1:39:00 AM	
+Unknown	TC/TN		B20NF		10.61				4.532	mg/L	38	14/12/2023 1:59:22 AM	
+Unknown	TC/TN		B11NF		11.19				4.585	mg/L	39	14/12/2023 2:21:04 AM	
+Unknown	TC/TN		B25NF		7.615				1.810	mg/L	40	14/12/2023 2:36:13 AM	
+Unknown	TC/TN		blank		0.1867				0.000	mg/L	41	14/12/2023 2:45:37 AM	
+Unknown	TC/TN		tc50		46.51				0.000	mg/L	42	14/12/2023 2:58:38 AM	
+Unknown	TC/TN		tn25		0.5399				27.32	mg/L	43	14/12/2023 3:18:52 AM	
+Unknown	TC/TN		B4F		134.7				8.119	mg/L	44	14/12/2023 3:31:16 AM	
+Unknown	TC/TN		B1NF		12.36				8.404	mg/L	45	14/12/2023 3:43:35 AM	
+Unknown	TC/TN		B9NF		21.70				371.1	mg/L	46	14/12/2023 4:07:12 AM	
+Unknown	TC/TN		B8NF		11.26				37.55	mg/L	47	14/12/2023 4:30:37 AM	
+Unknown	TC/TN		CNF		2.001				1.036	mg/L	48	14/12/2023 4:49:54 AM	
+Unknown	TC/TN		B2NF		11.16				9.265	mg/L	49	14/12/2023 5:05:52 AM	
+Unknown	TC/TN		B3F		74.43				6.716	mg/L	50	14/12/2023 5:21:20 AM	
+Unknown	TC/TN		CNF		2.242				0.3923	mg/L	51	14/12/2023 5:33:15 AM	
+Unknown	TC/TN		B6NF		22.20				224.7	mg/L	52	14/12/2023 5:51:35 AM	
+Unknown	TC/TN		B11F		150.4				10.69	mg/L	53	14/12/2023 6:07:37 AM	
+Unknown	TC/TN		blank		0.5225				0.1563	mg/L	54	14/12/2023 6:23:01 AM	
+Unknown	TC/TN		blank		0.1744				0.000	mg/L	54	14/12/2023 6:30:46 AM	
+Unknown	TC/TN		blank		0.1609				0.000	mg/L	54	14/12/2023 6:38:25 AM	

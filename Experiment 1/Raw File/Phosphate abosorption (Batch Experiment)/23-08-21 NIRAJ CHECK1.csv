@@ -1,0 +1,19 @@
+Sample ID,Sample Details,Test Name,Result,Units,Absorbance,Time,Manual Dil,Auto Dil
+STANDARD 1,,o-Phos 1,  0.004,mg P/L,0.004092,Mon Aug 21 15:34:02 2023,1,1
+STANDARD 90,,o-Phos 1,  0.010,mg P/L,0.010269,Mon Aug 21 15:35:19 2023,1,1
+STANDARD 91,,o-Phos 1,  0.020,mg P/L,0.019804,Mon Aug 21 15:36:37 2023,1,1
+STANDARD 92,,o-Phos 1,  0.037,mg P/L,0.036933,Mon Aug 21 15:37:54 2023,1,1
+STANDARD 93,,o-Phos 1,  0.086,mg P/L,0.086061,Mon Aug 21 15:39:11 2023,1,1
+STANDARD 94,,o-Phos 1,  0.171,mg P/L,0.171356,Mon Aug 21 15:40:32 2023,1,1
+STANDARD 95,,o-Phos 1,  0.329,mg P/L,0.328949,Mon Aug 21 15:41:51 2023,1,1
+STANDARD 0,,o-Phos 1,  0.004,mg P/L,0.003989,Mon Aug 21 15:42:48 2023,1,1
+C C V,,o-Phos 1,  0.505,mg P/L,0.169066,Mon Aug 21 15:43:50 2023,1,1
+C C B ,,o-Phos 1, -0.001,mg P/L,0.004039,Mon Aug 21 15:44:43 2023,1,1
+PU1,,o-Phos 1,  0.039,mg P/L,0.017099,Mon Aug 21 15:45:36 2023,1,1
+PU10,,o-Phos 1,  0.148,mg P/L,0.052596,Mon Aug 21 15:46:29 2023,1,1
+WU1,,o-Phos 1,  0.015,mg P/L,0.009216,Mon Aug 21 15:47:23 2023,1,1
+WU10,,o-Phos 1,  0.094,mg P/L,0.035122,Mon Aug 21 15:48:16 2023,1,1
+WU1,,o-Phos 1,  0.012,mg P/L,0.008469,Mon Aug 21 15:49:09 2023,1,1
+C-W,,o-Phos 1,  0.017,mg P/L,0.009908,Mon Aug 21 15:50:02 2023,1,1
+C C V,,o-Phos 1,  0.503,mg P/L,0.168482,Mon Aug 21 15:50:55 2023,1,1
+C C B ,,o-Phos 1, -0.001,mg P/L,0.004150,Mon Aug 21 15:51:49 2023,1,1

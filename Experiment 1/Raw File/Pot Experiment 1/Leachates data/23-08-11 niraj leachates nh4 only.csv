@@ -1,0 +1,23 @@
+Sample ID,Sample Details,Test Name,Result,Units,Absorbance,Time,Manual Dil,Auto Dil
+STANDARD 1,,Ammonia 2.0, 0.0485,mg N/L,0.048476,Fri Aug 11 11:12:01 2023,1,1
+STANDARD 90,,Ammonia 2.0, 0.0682,mg N/L,0.068189,Fri Aug 11 11:14:01 2023,1,1
+STANDARD 91,,Ammonia 2.0, 0.0975,mg N/L,0.097488,Fri Aug 11 11:16:01 2023,1,1
+STANDARD 92,,Ammonia 2.0, 0.1471,mg N/L,0.147069,Fri Aug 11 11:17:59 2023,1,1
+STANDARD 93,,Ammonia 2.0, 0.2962,mg N/L,0.296166,Fri Aug 11 11:19:57 2023,1,1
+STANDARD 94,,Ammonia 2.0, 0.5260,mg N/L,0.525975,Fri Aug 11 11:21:54 2023,1,1
+STANDARD 95,,Ammonia 2.0, 0.9771,mg N/L,0.977065,Fri Aug 11 11:23:52 2023,1,1
+STANDARD 0,,Ammonia 2.0, 0.0471,mg N/L,0.047064,Fri Aug 11 11:25:50 2023,1,1
+C C V,,Ammonia 2.0, 1.4454,mg N/L,0.725441,Fri Aug 11 11:27:49 2023,1,1
+C C B ,,Ammonia 2.0,-0.0129,mg N/L,0.047817,Fri Aug 11 11:29:47 2023,1,1
+a21,,Ammonia 2.0, 0.7253,mg N/L,0.390840,Fri Aug 11 11:31:45 2023,1,1
+a22,,Ammonia 2.0, 0.4708,mg N/L,0.272590,Fri Aug 11 11:33:43 2023,1,1
+a23,,Ammonia 2.0, 0.6483,mg N/L,0.355070,Fri Aug 11 11:35:42 2023,1,1
+a24,,Ammonia 2.0, 0.1095,mg N/L,0.104672,Fri Aug 11 11:37:42 2023,1,1
+a25,,Ammonia 2.0, 0.0742,mg N/L,0.088257,Fri Aug 11 11:39:42 2023,1,1
+b21,,Ammonia 2.0, 0.0281,mg N/L,0.066847,Fri Aug 11 11:41:21 2023,1,1
+b22,,Ammonia 2.0, 0.5967,mg N/L,0.331056,Fri Aug 11 11:43:00 2023,1,1
+b23,,Ammonia 2.0, 0.2782,mg N/L,0.183057,Fri Aug 11 11:44:38 2023,1,1
+b24,,Ammonia 2.0, 0.0357,mg N/L,0.070390,Fri Aug 11 11:46:17 2023,1,1
+b25,,Ammonia 2.0, 0.7774,mg N/L,0.415018,Fri Aug 11 11:47:55 2023,1,1
+C C V,,Ammonia 2.0, 1.4880,mg N/L,0.745213,Fri Aug 11 11:49:34 2023,1,1
+C C B ,,Ammonia 2.0,-0.0132,mg N/L,0.047676,Fri Aug 11 11:51:13 2023,1,1
