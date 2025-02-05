@@ -1,14 +1,18 @@
 # Set working directory and load data
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
+setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2/Modified_Data_File")
 list.files()
-
 # Load necessary libraries
 library(dplyr)
-library(tidyr)
-library(ggplot2)
 library(lme4)
-library(emmeans)
 library(car)
+library(corrplot)
+library(FactoMineR)
+library(factoextra)
+library(tidyverse)
+library(ggplot2)
+library(multcomp)
+library(multcompView)
+
 
 
 # Convert variables to factors
@@ -93,36 +97,6 @@ summary(m1_pH)
 # ANOVA to test significance of fixed effects
 Anova(m1_pH)
 
-# --- Post-hoc Analysis ---
-post_hoc_pH <- emmeans(m1_pH, 
-                       pairwise ~ Time_Point * Dose * Fertilizer_Type, 
-                       adjust = "tukey")
-
-# Display the summary of pairwise comparisons
-summary(post_hoc_pH)
-
-# Extract the emmeans table
-emmeans_table_pH <- as.data.frame(post_hoc_pH$emmeans)
-print(emmeans_table_pH)
-
-# Extract the pairwise comparisons table
-pairwise_comparisons_pH <- as.data.frame(post_hoc_pH$contrasts)
-print(pairwise_comparisons_pH)
-
-# Save the results
-write.csv(emmeans_table_pH, "pH_emmeans_table.csv", row.names = FALSE)
-write.csv(pairwise_comparisons_pH, "pH_pairwise_comparisons.csv", row.names = FALSE)
-
-# --- Visualization of Estimated Marginal Means ---
-emmeans_plot_pH <- emmip(m1_pH, Time_Point ~ Dose | Fertilizer_Type,
-                         CIs = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Estimated Marginal Means for pH Levels",
-    y = "Estimated pH",
-    x = "Time Point"
-  )
-print(emmeans_plot_pH)
 
 # Load necessary libraries
 library(dplyr)
@@ -208,8 +182,350 @@ emmip_plot_dose <- emmip(m1_pH, Dose ~ Date, CIs = TRUE) +
   theme(
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1)
+    Date=fct_relevel(Date, 'pH_BF')
   )
 print(emmip_plot_dose)
+
+
+# Load necessary libraries
+library(lme4)
+library(car)
+library(ggplot2)
+library(emmeans)
+library(dplyr)
+library(ggeffects)
+library(tidyr)
+
+# Convert variables to factors
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(
+    Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
+    Fertilizer_Type = factor(Fertilizer.type, levels = c("None", "MF", "UF")),
+    Application_Method = factor(Application_method, levels = c("One-time", "Split"))
+  )
+
+# Select pH-related columns dynamically
+pH_columns <- grep("^pH_", names(Lucerne_exp2), value = TRUE)
+
+# Select relevant columns including identifiers
+pH_data <- Lucerne_exp2 %>%
+  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(pH_columns))
+
+# Reshape data to long format
+pH_long <- pH_data %>%
+  pivot_longer(
+    cols = starts_with("pH_"),
+    names_to = "Date",
+    values_to = "pH_Level"
+  ) %>%
+  mutate(
+    Date = factor(Date),
+    Combined.pot.id = as.character(Combined.pot.id)
+  ) %>%
+  drop_na(pH_Level)  # Remove missing values
+
+# Ensure pH_BF is the first level in Date
+pH_levels_order <- c("pH_BF", "pH_2.AF_1st_Split.", "pH_3_AF_2nd_Split", 
+                     "pH_4_AF_2nd_Split", "pH_5_AF_3nd_Split", "pH_6_AF_3nd_Split", 
+                     "pH_7_AF_3nd_Split", "pH_8_atHarvestDay")
+
+pH_long$Date <- factor(pH_long$Date, levels = pH_levels_order, ordered = TRUE)
+
+# Separate data by Application Method
+pH_one_time <- pH_long %>% filter(Application_Method == "One-time")
+pH_split <- pH_long %>% filter(Application_Method == "Split")
+
+# Apply log10 transformation to pH_Level
+pH_long <- pH_long %>%
+  mutate(log_pH_Level = log10(pH_Level))
+
+# --- Fit a Linear Mixed Effects Model (Repeated Measures) with log10 transformation ---
+m1_pH <- lmer(log_pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_long)
+
+# Model diagnostics
+plot(m1_pH)
+qqPlot(resid(m1_pH))  # QQ plot of residuals
+
+# ANOVA to test significance of fixed effects
+Anova(m1_pH, test="F")
+
+# Summary of the model
+summary(m1_pH)
+
+# --- Prediction Plot Using ggeffects ---
+predict_plot <- predict_response(m1_pH, c("Date", "Dose")) %>% plot()
+print(predict_plot)
+# Boxplot for log10(pH) across time points (Date) and Dose
+pH_boxplot <- ggplot(pH_long, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot with transparency
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Add jittered points
+  theme_minimal() +
+  labs(
+    title = "Distribution of log10(pH) Levels Over Time",
+    x = "Date (Time Point)",
+    y = "log10(pH) Level",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure correct time order
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+
+print(pH_boxplot)
+
+
+
+# --- 1. Plot Estimated Marginal Means for pH by Dose ---
+emmip_plot_dose <- emmip(m1_pH, Dose ~ Date, CIs = TRUE) +  
+  geom_point(aes(shape = Dose), size = 3) +  # Different shapes for Dose
+  geom_line(aes(linetype = Dose), linewidth = 1) +  # Use linewidth instead of size
+  theme_minimal() +
+  labs(
+    title = "Estimated Marginal Means for log10(pH) Levels by Dose",
+    y = "Estimated log10(pH)",
+    x = "Date (Time Point)"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure custom order on x-axis
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+print(emmip_plot_dose)
+
+
+
+###For PH LUCERNE 
+# Load necessary libraries
+library(lme4)
+library(car)
+library(ggplot2)
+library(emmeans)
+library(dplyr)
+library(ggeffects)
+library(tidyr)
+# Convert variables to factors
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(
+    Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
+    Fertilizer_Type = factor(Fertilizer.type, levels = c("None", "MF", "UF")),
+    Application_Method = factor(Application_method, levels = c("One-time", "Split"))
+  )
+
+# Select pH-related columns dynamically
+pH_columns <- grep("^pH_", names(Lucerne_exp2), value = TRUE)
+
+# Select relevant columns including identifiers
+pH_data <- Lucerne_exp2 %>%
+  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(pH_columns))
+
+# Reshape data to long format
+pH_long <- pH_data %>%
+  pivot_longer(
+    cols = starts_with("pH_"),
+    names_to = "Date",
+    values_to = "pH_Level"
+  ) %>%
+  mutate(
+    Date = factor(Date),
+    Combined.pot.id = as.character(Combined.pot.id)
+  ) %>%
+  drop_na(pH_Level)  # Remove missing values
+
+# Ensure pH_BF is the first level in Date
+pH_levels_order <- c("pH_BF", "pH_2.AF_1st_Split.", "pH_3_AF_2nd_Split", 
+                     "pH_4_AF_2nd_Split", "pH_5_AF_3nd_Split", "pH_6_AF_3nd_Split", 
+                     "pH_7_AF_3nd_Split", "pH_8_atHarvestDay")
+
+pH_long$Date <- factor(pH_long$Date, levels = pH_levels_order, ordered = TRUE)
+
+# Separate data by Application Method
+pH_one_time <- pH_long %>% filter(Application_Method == "One-time")
+pH_split <- pH_long %>% filter(Application_Method == "Split")
+
+# Apply log10 transformation to pH_Level
+pH_long <- pH_long %>%
+  mutate(log_pH_Level = log10(pH_Level))
+# Fit a Linear Mixed Effects Model (Repeated Measures) with log10 transformation
+m1_pH <- lmer(log_pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_long)
+
+# Model diagnostics
+plot(m1_pH)
+qqPlot(resid(m1_pH))  # QQ plot of residuals
+
+# ANOVA to test significance of fixed effects
+Anova(m1_pH, test="F")
+
+# Summary of the model
+summary(m1_pH)
+
+# Apply log10 transformation to pH_Level before filtering datasets
+pH_long <- pH_long %>%
+  mutate(
+    pH_Level = as.numeric(pH_Level),  # Ensure pH_Level is numeric
+    log_pH_Level = log10(pH_Level)  # Apply log transformation
+  ) %>%
+  drop_na(log_pH_Level)  # Remove missing transformed values
+
+# Now, create subsets after transformation
+pH_one_time <- pH_long %>% filter(Application_Method == "One-time")
+pH_split <- pH_long %>% filter(Application_Method == "Split")
+
+# --- Boxplot for One-time Application Method ---
+ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot with transparency
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Add jittered points
+  theme_minimal() +
+  labs(
+    title = "Distribution of log10(pH) Levels Over Time (One-time Application)",
+    x = "Date (Time Point)",
+    y = "log10(pH) Level",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure correct time order
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  ) +
+  geom_hline(yintercept = mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")  # Add reference line for Dose 0
+
+# --- Boxplot for Split Application Method ---
+ggplot(pH_split, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot with transparency
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Add jittered points
+  theme_minimal() +
+  labs(
+    title = "Distribution of log10(pH) Levels Over Time (Split Application)",
+    x = "Date (Time Point)",
+    y = "log10(pH) Level",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure correct time order
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  ) +
+  geom_hline(yintercept = mean(pH_split$log_pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")  # Add reference line for Dose 0
+
+# Calculate mean log_pH_Level for Dose 0 in One-time application
+dose_0_mean <- mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE)
+
+# Plot with reference line
+ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot with transparency
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Add jittered points
+  geom_hline(yintercept = dose_0_mean, linetype = "dashed", color = "black", linewidth = 1) +  # Reference line for Dose 0
+  theme_minimal() +
+  labs(
+    title = "Distribution of log10(pH) Levels Over Time (One-time Application)",
+    x = "Date (Time Point)",
+    y = "log10(pH) Level",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure correct time order
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+# Ensure Dose 0 is included in One-time dataset
+pH_one_time <- pH_long %>% 
+  filter(Application_Method == "One-time" & Dose %in% c("0", "30", "60"))
+
+# Calculate mean log_pH_Level for Dose 0 in One-time application
+dose_0_mean <- mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE)
+
+# Plot with Dose 0 included
+ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot with transparency
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Add jittered points
+  geom_hline(yintercept = dose_0_mean, linetype = "dashed", color = "black", linewidth = 1) +  # Reference line for Dose 0
+  theme_minimal() +
+  labs(
+    title = "Distribution of log10(pH) Levels Over Time (One-time Application with Dose 0)",
+    x = "Date (Time Point)",
+    y = "log10(pH) Level",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure correct time order
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+# Ensure pH_Long has log transformation before filtering
+pH_long <- pH_long %>%
+  mutate(
+    pH_Level = as.numeric(pH_Level),  # Ensure pH_Level is numeric
+    log_pH_Level = log10(pH_Level)  # Apply log transformation
+  ) %>%
+  drop_na(log_pH_Level)  # Remove missing transformed values
+
+# Create dataset including Dose 0 (control) in both application methods
+pH_selected <- pH_long %>%
+  filter(Dose %in% c("0", "10", "20", "30", "40", "50", "60"))  # Ensure Dose 0 is included
+
+# Ensure correct factor levels for Application Method
+pH_selected <- pH_selected %>%
+  mutate(Application_Method = factor(Application_Method, levels = c("One-time", "Split")))
+
+# Check structure of dataset to confirm it exists
+str(pH_selected)
+head(pH_selected)
+# Fit a Linear Mixed Effects Model (Repeated Measures) with log10 transformation
+m1_pH_control <- lmer(log_pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_selected)
+
+# Model diagnostics
+plot(m1_pH_control)
+qqPlot(resid(m1_pH_control))  # QQ plot of residuals
+
+# ANOVA to test significance of fixed effects
+Anova(m1_pH_control, test="F")
+
+# Summary of the model
+summary(m1_pH_control)
+ls()  # Lists all objects in the current environment
+
+# Fit a Linear Mixed Effects Model (Repeated Measures) with log10 transformation
+m1_pH_control <- lmer(log_pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_selected)
+
+# Model diagnostics
+plot(m1_pH_control)
+qqPlot(resid(m1_pH_control))  # QQ plot of residuals
+
+# ANOVA to test significance of fixed effects
+Anova(m1_pH_control, test="F")
+
+# Summary of the model
+summary(m1_pH_control)
+
+# --- Estimated Marginal Means Analysis ---
+emmip_plot_dose_control <- emmip(m1_pH_control, Dose ~ Date | Application_Method, CIs = TRUE) +  
+  geom_point(aes(shape = Dose), size = 3) +  # Different shapes for Dose
+  geom_line(aes(linetype = Dose), linewidth = 1) +  # Use linewidth instead of size
+  theme_minimal() +
+  labs(
+    title = "Estimated Marginal Means for log10(pH) Levels by Dose (One-time vs Split)",
+    y = "Estimated log10(pH)",
+    x = "Date (Time Point)"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +  # Ensure custom order on x-axis
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+print(emmip_plot_dose_control)
+
+
+
+
 
 #Now cholrophyll data set:
 

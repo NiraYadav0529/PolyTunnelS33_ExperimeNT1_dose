@@ -1,3 +1,7 @@
+setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2/Modified_Data_File")
+list.files()
+Lucerne_exp2 <- read.csv("Lucerne_FinalData_analysis.csv", check.names = TRUE)
+
 library(lme4)      # For linear mixed-effects modeling
 library(car)       # For ANOVA and diagnostic plots
 library(ggplot2)   # For visualization

@@ -1,6 +1,6 @@
 
 # Set working directory and load data
-setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2")
+setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2/Modified_Data_File")
 list.files()
 # Load necessary libraries
 library(dplyr)
@@ -13,9 +13,6 @@ library(tidyverse)
 library(ggplot2)
 library(multcomp)
 library(multcompView)
-
-# Set working directory
-setwd("Experiment_2")
 
 # Load the dataset
 Lucerne_exp2 <- read.csv("Lucerne_FinalData_analysis.csv", check.names = TRUE)
