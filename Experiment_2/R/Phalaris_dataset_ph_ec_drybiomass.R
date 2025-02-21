@@ -1,9 +1,10 @@
+
 setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2/Modified_Data_File")
 list.files()
 Phalaris_exp2 <- read.csv("Phalaris_FinalData_analysis.csv", check.names = TRUE)
-colnames( Phalaris_exp2)
-##loading required libraries 
+colnames(Phalaris_exp2)
 
+##loading required libraries 
 library(lme4)      # Linear mixed-effects modeling
 library(car)       # ANOVA and model diagnostics
 library(ggplot2)   # Visualization
@@ -11,69 +12,16 @@ library(dplyr)     # Data manipulation
 library(tidyr)     # Data reshaping
 library(ggeffects) # Predicted values extraction
 
-##converting catagorical variables to factors 
+##converting categorical variables to factors 
 Phalaris_exp2 <- Phalaris_exp2 %>%
   mutate(
     Dose = factor(Dose_.N.kg.ha., levels = c("0", "20", "40", "60", "80", "100", "120")),
     Fertilizer_Type = factor(Fertilizer_type, levels = c("None", "MF", "UF")),
-    Application_Method = factor(Application_method, levels = c("One-time", "Split"))
+    Application_Method = factor(Application_method, levels = c("One-time", "Split")),
+    Treatment_Type = factor(Treatment_Type, levels = c("Control", "Other"))
   )
 
-
-##Step 3: Extract and Reshape pH-related Columns
-pH_columns <- grep("^pH_", names(Phalaris_exp2), value = TRUE)
-
-pH_data <- Phalaris_exp2 %>%
-  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(pH_columns)) %>%
-  pivot_longer(cols = starts_with("pH_"), names_to = "Date", values_to = "pH_Level") %>%
-  mutate(Date = factor(Date), Combined.pot.id = as.character(Combined.pot.id)) %>%
-  drop_na(pH_Level)
-###Step 4: Ensure Correct Ordering of Time Points
-pH_levels_order <- paste0("pH_", 1:10)
-
-pH_data$Date <- factor(pH_data$Date, levels = pH_levels_order, ordered = TRUE)
-
-
-##Step 5: Apply log10 Transformation to pH Levels
-pH_data <- pH_data %>%
-  mutate(log_pH_Level = log10(pH_Level))
-##Step 6: Fit Linear Mixed-Effects Model for pH
-m1_pH <- lmer(log_pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_data)
-plot(m1_pH)
-qqPlot(resid(m1_pH))
-Anova(m1_pH, test="F")
-summary(m1_pH)
-##Step 7: Separate One-Time and Split Application for pH
-
-pH_one_time <- pH_data %>% filter(Application_Method == "One-time")
-pH_split <- pH_data %>% filter(Application_Method == "Split")
-
-##Step 8: Boxplots for pH 1.One-time Application
-ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
-  geom_hline(yintercept = mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
-             linetype = "dashed", color = "black") +
-  theme_minimal() +
-  labs(title = "log10(pH) Levels Over Time (One-time Application)", x = "Date", y = "log10(pH)", fill = "Dose", color = "Dose") +
-  scale_x_discrete(limits = pH_levels_order) +
-  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
-##Box Plot for pH (Split Application) 2. Split application 
-ggplot(pH_split, aes(x = Date, y = log_pH_Level, fill = Dose)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
-  geom_hline(yintercept = mean(pH_split$log_pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
-             linetype = "dashed", color = "black") +
-  theme_minimal() +
-  labs(title = "log10(pH) Levels Over Time (Split Application)",
-       x = "Date", y = "log10(pH)", fill = "Dose", color = "Dose") +
-  scale_x_discrete(limits = pH_levels_order) +
-  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
-head(Phalaris_exp2)
-
-
-Phalaris_exp2 <- Phalaris_exp2 %>%
-  mutate(Application_method = ifelse(Treatment_Type == "Control", "None", Application_method))
+## Step 3: Extract and Reshape pH-related Columns
 pH_columns <- grep("^pH_", names(Phalaris_exp2), value = TRUE)
 
 pH_data <- Phalaris_exp2 %>%
@@ -81,54 +29,75 @@ pH_data <- Phalaris_exp2 %>%
   pivot_longer(cols = starts_with("pH_"), names_to = "Date", values_to = "pH_Level") %>%
   mutate(Date = factor(Date), Combined.pot.id = as.character(Combined.pot.id)) %>%
   drop_na(pH_Level)
-pH_data_filtered <- pH_data %>%
-  filter(Application_Method == "Split" | Treatment_Type == "Control")
-pH_data_filtered <- pH_data_filtered %>%
-  mutate(log_pH_Level = log10(pH_Level))
-m1_pH <- lmer(log_pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_data_filtered)
+
+### Step 4: Ensure Correct Ordering of Time Points
+pH_levels_order <- paste0("pH_", 1:10)
+
+pH_data$Date <- factor(pH_data$Date, levels = pH_levels_order, ordered = TRUE)
+
+## Step 5: Fit Linear Mixed-Effects Model for pH
+m1_pH <- lmer(pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data)
 plot(m1_pH)
 qqPlot(resid(m1_pH))
 Anova(m1_pH, test="F")
 summary(m1_pH)
-pH_one_time <- pH_data_filtered %>% filter(Application_Method == "One-time" | Treatment_Type == "Control")
-pH_split <- pH_data_filtered %>% filter(Application_Method == "Split" | Treatment_Type == "Control")
-ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+
+## Step 6: Separate One-Time and Split Application for pH
+pH_one_time <- pH_data %>% filter(Application_Method == "One-time" | Treatment_Type == "Control")
+pH_split <- pH_data %>% filter(Application_Method == "Split" | Treatment_Type == "Control")
+
+## Step 7: Boxplots for pH (One-time Application including Control)
+ggplot(pH_one_time, aes(x = Date, y = pH_Level, fill = Dose)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
   geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
-  geom_hline(yintercept = mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
+  geom_hline(yintercept = mean(pH_one_time$pH_Level[pH_one_time$Dose == "0" & pH_one_time$Treatment_Type == "Control"], na.rm = TRUE),
              linetype = "dashed", color = "black") +
   theme_minimal() +
-  labs(title = "log10(pH) Levels Over Time (One-time Application, Including Control)",
-       x = "Date", y = "log10(pH)", fill = "Dose", color = "Dose") +
-  scale_x_discrete(limits = unique(pH_data_filtered$Date)) +
-  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
-ggplot(pH_split, aes(x = Date, y = log_pH_Level, fill = Dose)) +
-  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
-  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
-  geom_hline(yintercept = mean(pH_split$log_pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
-             linetype = "dashed", color = "black") +
-  theme_minimal() +
-  labs(title = "log10(pH) Levels Over Time (Split Application, Including Control)",
-       x = "Date", y = "log10(pH)", fill = "Dose", color = "Dose") +
-  scale_x_discrete(limits = unique(pH_data_filtered$Date)) +
+  labs(title = "pH Levels Over Time (One-time Application, Including Control)",
+       x = "Date", y = "pH", fill = "Dose", color = "Dose") +
+  scale_x_discrete(limits = pH_levels_order) +
   theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
 
-# Select data for one-time application including control and doses 60 and 120
+## Box Plot for pH (Split Application including Control)
+ggplot(pH_split, aes(x = Date, y = pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  geom_hline(yintercept = mean(pH_split$pH_Level[pH_split$Dose == "0" & pH_split$Treatment_Type == "Control"], na.rm = TRUE),
+             linetype = "dashed", color = "black") +
+  theme_minimal() +
+  labs(title = "pH Levels Over Time (Split Application, Including Control)",
+       x = "Date", y = "pH", fill = "Dose", color = "Dose") +
+  scale_x_discrete(limits = pH_levels_order) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
+
+## Updated data filtering for One-time and Split applications with controls
+pH_data_filtered <- pH_data %>%
+  filter(Application_Method == "Split" | Treatment_Type == "Control")
+m1_pH <- lmer(pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data_filtered)
+plot(m1_pH)
+qqPlot(resid(m1_pH))
+Anova(m1_pH, test="F")
+summary(m1_pH)
+
 pH_one_time_updated <- pH_data_filtered %>%
   filter(Application_Method == "One-time" | Treatment_Type == "Control" | Dose %in% c("0", "60", "120")) 
 
-# Generate the box plot
-ggplot(pH_one_time_updated, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+## Generate the updated box plot with control included
+ggplot(pH_one_time_updated, aes(x = Date, y = pH_Level, fill = Dose)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # Boxplot without outlier points
   geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +  # Jittered points for visibility
-  geom_hline(yintercept = mean(pH_one_time_updated$log_pH_Level[pH_one_time_updated$Dose == "0"], na.rm = TRUE),
+  geom_hline(yintercept = mean(pH_one_time_updated$pH_Level[pH_one_time_updated$Dose == "0" & pH_one_time_updated$Treatment_Type == "Control"], na.rm = TRUE),
              linetype = "dashed", color = "black") +  # Dashed line for control (Dose 0)
   theme_minimal() +
-  labs(title = "log10(pH) Levels Over Time (One-time Application, Including Control, 60 & 120 Doses)",
-       x = "Date", y = "log10(pH)", fill = "Dose", color = "Dose") +
+  labs(title = "pH Levels Over Time (One-time Application, Including Control, 60 & 120 Doses)",
+       x = "Date", y = "pH", fill = "Dose", color = "Dose") +
   scale_x_discrete(limits = unique(pH_data_filtered$Date)) +
   theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
 
+
+
+
+##Ec Data for Phalaris
 
 ec_columns <- grep("^EC_", names(Phalaris_exp2), value = TRUE)
 
@@ -302,3 +271,57 @@ ggplot(biomass_data, aes(x = Date, y = Predicted, group = Dose, color = Dose)) +
        x = "Date", y = "Predicted log10(Dry Biomass)", color = "Dose") +
   scale_x_discrete(limits = unique(biomass_data$Date)) +
   theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+
+#ph changes over time 
+
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Ensure Dose is treated as a numeric variable and convert categorical variables
+Phalaris_exp2 <- Phalaris_exp2 %>%
+  mutate(
+    Dose = as.numeric(as.character(Dose_.N.kg.ha.)),  # Convert Dose to numeric
+    Fertilizer_Type = as.factor(Fertilizer_type),      # Convert Fertilizer type to factor
+    Application_Method = as.factor(Application_method) # Convert Application method to factor
+  )
+
+# Check if Dose conversion is successful
+summary(Phalaris_exp2$Dose)
+
+# Create a summary table for Mean pH Change and Standard Error (SE)
+summary_pH_Phalaris <- Phalaris_exp2 %>%
+  group_by(Dose, Fertilizer_Type, Application_Method) %>% 
+  summarise(
+    Mean_pH = mean(PH.Chang, na.rm = TRUE),  # Calculate mean pH change
+    SD_pH = sd(PH.Chang, na.rm = TRUE),      # Standard deviation
+    SE = SD_pH / sqrt(n())                   # Standard error
+  ) %>%
+  ungroup()
+
+# Check if summary_pH_Phalaris is created correctly
+head(summary_pH_Phalaris)
+
+# Visualization of pH unit changes with N-added rate, Fertilizer Type, and Application Method
+ggplot(summary_pH_Phalaris, aes(x = Mean_pH, y = as.factor(Dose), color = Fertilizer_Type, shape = Application_Method)) +
+  geom_point(size = 4, position = position_dodge(width = 0.3)) +  # Add mean pH change points
+  geom_errorbarh(aes(xmin = Mean_pH - SE, xmax = Mean_pH + SE), height = 0.2, position = position_dodge(width = 0.3)) +  # Error bars
+  theme_minimal() +
+  labs(
+    x = "pH Unit Change",
+    y = "N-added rates (kg N/ha)",
+    title = "Effect of Nitrogen Addition, Fertilizer Type, and Application Method on Soil pH (Phalaris)",
+    color = "Fertilizer Type",
+    shape = "Application Method"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "right"
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")  # Reference line at 0
+

@@ -1,3 +1,4 @@
+
 setwd("C:/Users/90958427/OneDrive - Western Sydney University/PolyTunnelS33_ExperimeNT1_dose/Experiment_2/Modified_Data_File")
 list.files()
 Lucerne_exp2 <- read.csv("Lucerne_FinalData_analysis.csv", check.names = TRUE)
@@ -8,14 +9,16 @@ library(ggplot2)   # For visualization
 library(dplyr)     # For data manipulation
 library(tidyr)     # For reshaping data
 library(ggeffects) # For obtaining predicted values
-#Convert categorical variables to factors
+
+# Convert categorical variables to factors
 Lucerne_exp2 <- Lucerne_exp2 %>%
   mutate(
     Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
     Fertilizer_Type = factor(Fertilizer.type, levels = c("None", "MF", "UF")),
     Application_Method = factor(Application_method, levels = c("One-time", "Split"))
   )
-##Extract pH-related columns
+
+# Extract pH-related columns
 pH_columns <- grep("^pH_", names(Lucerne_exp2), value = TRUE)
 
 pH_data <- Lucerne_exp2 %>%
@@ -26,18 +29,16 @@ pH_data <- Lucerne_exp2 %>%
     Combined.pot.id = as.character(Combined.pot.id)
   ) %>%
   drop_na(pH_Level)  # Remove missing values
-##Ensure correct time order
+
+# Ensure correct time order
 pH_levels_order <- c("pH_BF", "pH_2.AF_1st_Split.", "pH_3_AF_2nd_Split", 
                      "pH_4_AF_2nd_Split", "pH_5_AF_3nd_Split", "pH_6_AF_3nd_Split", 
                      "pH_7_AF_3nd_Split", "pH_8_atHarvestDay")
 
 pH_data$Date <- factor(pH_data$Date, levels = pH_levels_order, ordered = TRUE)
 
-##Step 4: Apply log10 Transformation to pH Levels
-pH_data <- pH_data %>%
-  mutate(log_pH_Level = log10(pH_Level))
-##Step 5: Fit Linear Mixed Effects Model (LMM)
-m1_pH <- lmer(log_pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_data)
+# Fit Linear Mixed Effects Model (LMM) for pH
+m1_pH <- lmer(pH_Level ~ Dose * Date + (1|Combined.pot.id), data = pH_data)
 
 # Model Diagnostics
 plot(m1_pH)                
@@ -49,22 +50,21 @@ Anova(m1_pH, test="F")
 # Summary
 summary(m1_pH)
 
+# Split Data by Application Method
+pH_one_time <- pH_data %>% filter(Application_Method == "One-time" | Dose == "0")
+pH_split <- pH_data %>% filter(Application_Method == "Split" | Dose == "0")
 
-##Step 6: Split Data by Application Method
-pH_one_time <- pH_data %>% filter(Application_Method == "One-time")
-pH_split <- pH_data %>% filter(Application_Method == "Split")
+# Boxplots for pH Levels (One-time and Split Applications)
 
-##Step 7: Boxplots of log10(pH) Levels
-##(A) One-time Application
-
-ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+# One-time Application Plot (Including Control)
+ggplot(pH_one_time, aes(x = Date, y = pH_Level, fill = Dose)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
   geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
   theme_minimal() +
   labs(
-    title = "log10(pH) Levels Over Time (One-time Application)",
+    title = "Lucerne pH Levels Over Time (One-time Application, Including Control)",
     x = "Date",
-    y = "log10(pH)",
+    y = "pH",
     fill = "Dose",
     color = "Dose"
   ) +
@@ -73,18 +73,18 @@ ggplot(pH_one_time, aes(x = Date, y = log_pH_Level, fill = Dose)) +
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
-  geom_hline(yintercept = mean(pH_one_time$log_pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
+  geom_hline(yintercept = mean(pH_one_time$pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
              linetype = "dashed", color = "black")
 
-##(B) Split Application
-ggplot(pH_split, aes(x = Date, y = log_pH_Level, fill = Dose)) +
+# Split Application Plot (Including Control)
+ggplot(pH_split, aes(x = Date, y = pH_Level, fill = Dose)) +
   geom_boxplot(alpha = 0.7, outlier.shape = NA) +
   geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
   theme_minimal() +
   labs(
-    title = "log10(pH) Levels Over Time (Split Application)",
+    title = "Lucerne pH Levels Over Time (Split Application, Including Control)",
     x = "Date",
-    y = "log10(pH)",
+    y = "pH",
     fill = "Dose",
     color = "Dose"
   ) +
@@ -93,10 +93,11 @@ ggplot(pH_split, aes(x = Date, y = log_pH_Level, fill = Dose)) +
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1)
   ) +
-  geom_hline(yintercept = mean(pH_split$log_pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
+  geom_hline(yintercept = mean(pH_split$pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
              linetype = "dashed", color = "black")
-##Step 8: Fit Model for Predicted Values
-m1_pH_control <- lmer(log_pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data)
+
+# Fit Model for Predicted Values with Control Group
+m1_pH_control <- lmer(pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data)
 
 # Model Diagnostics
 plot(m1_pH_control)
@@ -107,23 +108,23 @@ Anova(m1_pH_control, test="F")
 
 # Summary
 summary(m1_pH_control)
-##Step 9: Generate Predicted Values from Model
+
+# Generate Predicted Values from Model
 predicted_pH <- ggpredict(m1_pH_control, terms = c("Date", "Dose", "Application_Method"))
 
 # Convert to data frame
 predicted_pH_df <- as.data.frame(predicted_pH)
 
-
-##Step 10: Plot Predicted log10(pH) Over Time
+# Plot Predicted pH Over Time
 ggplot(predicted_pH_df, aes(x = x, y = predicted, group = group, color = group)) +
   geom_point(size = 3) +
   geom_line(linewidth = 1) +
   facet_wrap(~facet, ncol = 1) +
   theme_minimal() +
   labs(
-    title = "Predicted log10(pH) Levels Over Time",
+    title = "Predicted pH Levels Over Time",
     x = "Date",
-    y = "Predicted log10(pH)",
+    y = "Predicted pH",
     color = "Dose"
   ) +
   scale_x_discrete(limits = pH_levels_order) +
@@ -131,6 +132,9 @@ ggplot(predicted_pH_df, aes(x = x, y = predicted, group = group, color = group))
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
+
+
+
 
 #check column name 
 colnames(Lucerne_exp2)
@@ -421,3 +425,194 @@ ggplot(predicted_biomass_df, aes(x = x, y = predicted, group = group, color = gr
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
 
+# Filter the EC data to include Control (Dose == 0) in both one-time and split applications
+ec_one_time <- ec_data %>% filter(Application_Method == "One-time" | Dose == "0")
+ec_split <- ec_data %>% filter(Application_Method == "Split" | Dose == "0")
+
+# One-time Application Plot (Including Control)
+ggplot(ec_one_time, aes(x = Date, y = log_EC_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(EC) Levels Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(EC)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = ec_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(ec_one_time$log_EC_Level[ec_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+# Split Application Plot (Including Control)
+ggplot(ec_split, aes(x = Date, y = log_EC_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(EC) Levels Over Time (Split Application, Including Control)",
+    x = "Date",
+    y = "log10(EC)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = ec_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(ec_split$log_EC_Level[ec_split$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+
+# Filter the Chlorophyll data to include Control (Dose == 0) in both one-time and split applications
+chlorophyll_one_time <- chlorophyll_data %>% filter(Application_Method == "One-time" | Dose == "0")
+chlorophyll_split <- chlorophyll_data %>% filter(Application_Method == "Split" | Dose == "0")
+
+# One-time Application Plot (Including Control)
+ggplot(chlorophyll_one_time, aes(x = Date, y = log_Chlorophyll_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(Chlorophyll Content) Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(Chlorophyll Content)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = chlorophyll_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(chlorophyll_one_time$log_Chlorophyll_Level[chlorophyll_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+# Split Application Plot (Including Control)
+ggplot(chlorophyll_split, aes(x = Date, y = log_Chlorophyll_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(Chlorophyll Content) Over Time (Split Application, Including Control)",
+    x = "Date",
+    y = "log10(Chlorophyll Content)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = chlorophyll_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(chlorophyll_split$log_Chlorophyll_Level[chlorophyll_split$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+
+
+# Filter the Dry Biomass data to include Control (Dose == 0) in both one-time and split applications
+biomass_one_time <- biomass_data %>% filter(Application_Method == "One-time" | Dose == "0")
+biomass_split <- biomass_data %>% filter(Application_Method == "Split" | Dose == "0")
+
+# One-time Application Plot (Including Control)
+ggplot(biomass_one_time, aes(x = Date, y = log_Dry_Biomass, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(Dry Biomass) Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(Dry Biomass)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = biomass_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(biomass_one_time$log_Dry_Biomass[biomass_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+# Split Application Plot (Including Control)
+ggplot(biomass_split, aes(x = Date, y = log_Dry_Biomass, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "log10(Dry Biomass) Over Time (Split Application, Including Control)",
+    x = "Date",
+    y = "log10(Dry Biomass)",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = biomass_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(biomass_split$log_Dry_Biomass[biomass_split$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+
+
+###PH unict changes over time with N added rate for Lucerne 
+
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Ensure Dose is treated as a numeric variable and convert categorical variables
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(
+    Dose = as.numeric(as.character(Dose...N.kg.ha.)),  # Convert Dose to numeric
+    Fertilizer_Type = as.factor(Fertilizer.type),      # Convert Fertilizer type to factor
+    Application_Method = as.factor(Application_method) # Convert Application method to factor
+  )
+
+# Check if Dose conversion is successful
+summary(Lucerne_exp2$Dose)  
+
+# Create a summary table for Mean pH Change and Standard Error (SE)
+summary_pH_Lucerne <- Lucerne_exp2 %>%
+  group_by(Dose, Fertilizer_Type, Application_Method) %>% 
+  summarise(
+    Mean_pH = mean(PH.Chang, na.rm = TRUE),  # Calculate mean pH change
+    SD_pH = sd(PH.Chang, na.rm = TRUE),      # Standard deviation
+    SE = SD_pH / sqrt(n())                   # Standard error
+  ) %>%
+  ungroup()
+
+# Check if summary_pH_Lucerne is created correctly
+head(summary_pH_Lucerne)
+
+# Visualization of pH unit changes with N-added rate, Fertilizer Type, and Application Method
+ggplot(summary_pH_Lucerne, aes(x = Mean_pH, y = as.factor(Dose), color = Fertilizer_Type, shape = Application_Method)) +
+  geom_point(size = 4, position = position_dodge(width = 0.3)) +  # Add mean pH change points
+  geom_errorbarh(aes(xmin = Mean_pH - SE, xmax = Mean_pH + SE), height = 0.2, position = position_dodge(width = 0.3)) +  # Error bars
+  theme_minimal() +
+  labs(
+    x = "pH Unit Change",
+    y = "N-added rates (kg N/ha)",
+    title = "Effect of Nitrogen Addition, Fertilizer Type, and Application Method on Soil pH (Lucerne)",
+    color = "Fertilizer Type",
+    shape = "Application Method"
+  ) +
+  theme(
+    axis.text.y = element_text(size = 12),
+    axis.text.x = element_text(size = 12),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "right"
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black")  # Reference line at 0
+
+
+
+
+colnames(Lucerne_exp2)
