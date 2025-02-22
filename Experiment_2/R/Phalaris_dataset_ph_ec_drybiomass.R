@@ -22,18 +22,19 @@ Phalaris_exp2 <- Phalaris_exp2 %>%
   )
 
 ## Step 3: Extract and Reshape pH-related Columns
-pH_columns <- grep("^pH_", names(Phalaris_exp2), value = TRUE)
+pH_columns <- grep("^pH_[0-9]+$|^ph_10$", names(Phalaris_exp2), value = TRUE)
 
 pH_data <- Phalaris_exp2 %>%
   select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, Treatment_Type, all_of(pH_columns)) %>%
-  pivot_longer(cols = starts_with("pH_"), names_to = "Date", values_to = "pH_Level") %>%
+  pivot_longer(cols = all_of(pH_columns), names_to = "Date", values_to = "pH_Level") %>%
   mutate(Date = factor(Date), Combined.pot.id = as.character(Combined.pot.id)) %>%
   drop_na(pH_Level)
 
 ### Step 4: Ensure Correct Ordering of Time Points
-pH_levels_order <- paste0("pH_", 1:10)
+pH_levels_order <- c(paste0("pH_", 1:9), "ph_10")
 
 pH_data$Date <- factor(pH_data$Date, levels = pH_levels_order, ordered = TRUE)
+
 
 ## Step 5: Fit Linear Mixed-Effects Model for pH
 m1_pH <- lmer(pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data)
