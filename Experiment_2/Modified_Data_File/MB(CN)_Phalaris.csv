@@ -1,0 +1,60 @@
+S.No,Sample Name,Block,Fertilizer_type ,Dose_(N kg/ha),Application_method,Treatment_Type,TimePoint,Soil available NonFumigated C (mg/kg),Soil available Fumigated C (mg/kg),MBC (mg/kg),Soil available Nonfumigated  N (mg/kg),Soil available Fumigated  N (mg/kg),MBC N (mg/kg) 
+1,1P1,1,None,0,Split,Control,HarvestDay,73.932,207.582,133.649,11.483,28.249,16.766
+2,1P2,1,UF,20,Split,Fertilizer,HarvestDay,88.684,234.493,145.810,9.928,27.638,17.710
+3,1P3,1,UF,40,Split,Fertilizer,HarvestDay,75.821,244.451,168.630,12.267,28.223,15.956
+4,1P4,1,UF,60,Split,Fertilizer,HarvestDay,75.041,198.010,122.969,8.970,22.821,13.852
+5,1P5,1,UF,80,Split,Fertilizer,HarvestDay,74.201,157.428,83.227,9.207,19.312,10.104
+6,1P6,1,UF,100,Split,Fertilizer,HarvestDay,73.073,197.551,124.478,9.750,25.442,15.692
+7,1P7,1,UF,120,Split,Fertilizer,HarvestDay,83.768,193.354,109.586,9.635,22.086,12.451
+8,1P8,1,MF,60,One-time,Fertilizer,HarvestDay,70.080,216.317,146.237,10.075,27.858,17.783
+9,1P9,1,MF,120,One-time,Fertilizer,HarvestDay,71.418,238.142,166.725,12.187,33.876,21.688
+10,1P10,1,UF,120,One-time,Fertilizer,HarvestDay,68.462,189.838,121.376,7.176,23.533,16.357
+11,2P1,2,None,0,Split,Control,HarvestDay,79.591,218.060,138.470,19.017,42.360,23.343
+12,2P2,2,UF,20,Split,Fertilizer,HarvestDay,58.478,225.947,167.469,9.155,32.439,23.284
+13,2P3,2,UF,40,Split,Fertilizer,HarvestDay,76.748,200.189,123.441,11.502,29.875,18.373
+14,2P4,2,UF,60,Split,Fertilizer,HarvestDay,67.872,200.748,132.875,13.066,30.077,17.012
+15,2P5,2,UF,80,Split,Fertilizer,HarvestDay,59.621,227.190,167.570,7.902,29.232,21.330
+16,2P6,2,UF,100,Split,Fertilizer,HarvestDay,62.292,228.313,166.022,9.809,31.662,21.853
+17,2P7,2,UF,120,Split,Fertilizer,HarvestDay,67.640,158.839,91.199,14.305,24.909,10.604
+18,2P8,2,MF,60,One-time,Fertilizer,HarvestDay,66.733,224.046,157.313,9.172,32.375,23.203
+19,2P9,2,MF,120,One-time,Fertilizer,HarvestDay,66.590,208.752,142.162,9.466,27.865,18.399
+20,2P11,2,UF,120,One-time,Fertilizer,HarvestDay,76.110,197.433,121.323,18.292,32.837,14.545
+21,3P1,3,None,0,Split,Control,HarvestDay,71.104,230.732,159.628,11.123,30.781,19.659
+22,3P2,3,UF,20,Split,Fertilizer,HarvestDay,81.023,221.643,140.620,14.360,32.242,17.882
+23,3P3,3,UF,40,Split,Fertilizer,HarvestDay,64.036,226.749,162.712,10.829,34.376,23.547
+24,3P4,3,UF,60,Split,Fertilizer,HarvestDay,69.717,262.684,192.967,9.994,35.868,25.874
+25,3P5,3,UF,80,Split,Fertilizer,HarvestDay,83.603,191.493,107.890,10.655,26.098,15.443
+26,3P6,3,UF,100,Split,Fertilizer,HarvestDay,75.050,198.189,123.139,10.466,28.373,17.907
+27,3P7,3,UF,120,Split,Fertilizer,HarvestDay,65.555,249.157,183.602,11.303,34.743,23.440
+28,3P10,3,UF,60,One-time,Fertilizer,HarvestDay,60.153,215.351,155.198,9.921,28.859,18.937
+29,3P11,3,UF,120,One-time,Fertilizer,HarvestDay,80.044,257.004,176.960,11.872,40.157,28.285
+30,4P1,4,None,0,Split,Control,HarvestDay,70.667,257.148,186.481,9.925,32.593,22.669
+31,4P2,4,UF,20,Split,Fertilizer,HarvestDay,83.703,201.478,117.775,10.587,30.040,19.453
+32,4P3,4,UF,40,Split,Fertilizer,HarvestDay,73.227,253.255,180.028,10.840,34.066,23.225
+33,4P4,4,UF,60,Split,Fertilizer,HarvestDay,63.964,228.875,164.911,11.023,30.510,19.487
+34,4P5,4,UF,80,Split,Fertilizer,HarvestDay,92.450,176.493,84.044,15.118,24.779,9.661
+35,4P6,4,UF,100,Split,Fertilizer,HarvestDay,64.515,247.071,182.557,9.827,42.012,32.185
+36,4P7,4,UF,120,Split,Fertilizer,HarvestDay,64.000,194.094,130.095,9.835,25.266,15.432
+37,4P9,4,MF,120,One-time,Fertilizer,HarvestDay,58.869,208.864,149.995,9.491,34.882,25.391
+38,4P10,4,UF,60,One-time,Fertilizer,HarvestDay,57.552,189.369,131.817,7.954,29.825,21.871
+39,5P1,5,None,0,Split,Control,HarvestDay,53.748,198.297,144.548,7.961,29.204,21.243
+40,5P2,5,UF,20,Split,Fertilizer,HarvestDay,72.018,221.441,149.423,11.124,31.181,20.057
+41,5P3,5,UF,40,Split,Fertilizer,HarvestDay,72.761,216.342,143.581,11.329,36.910,25.581
+42,5P4,5,UF,60,Split,Fertilizer,HarvestDay,71.776,258.396,186.620,11.686,34.188,22.502
+43,5P5,5,UF,80,Split,Fertilizer,HarvestDay,58.861,213.617,154.756,9.071,31.112,22.041
+44,5P6,5,UF,100,Split,Fertilizer,HarvestDay,70.853,185.204,114.350,10.385,29.536,19.151
+45,5P7,5,UF,120,Split,Fertilizer,HarvestDay,74.133,228.892,154.759,11.211,31.233,20.022
+46,5P8,5,MF,60,One-time,Fertilizer,HarvestDay,47.688,256.062,208.374,7.260,37.114,29.854
+47,5P11,5,UF,120,One-time,Fertilizer,HarvestDay,58.502,210.753,152.251,7.850,23.955,16.105
+1,1P8,1,MF,60,One-time,Fertilizer,OT after_15days,86.489,213.023,26.525,51.941,126.534,25.416
+2,1P9,1,MF,120,One-time,Fertilizer,OT after_15days,139.673,250.985,43.069,57.255,111.312,14.186
+3,1P10,1,UF,60,One-time,Fertilizer,OT after_15days,145.016,72.952,140.271,185.078,-72.064,44.807
+4,2P8,2,MF,60,One-time,Fertilizer,OT after_15days,37.659,279.816,17.247,75.442,242.157,58.194
+5,2P9,2,MF,120,One-time,Fertilizer,OT after_15days,131.418,219.748,49.264,66.930,88.330,17.666
+6,2P11,2,UF,120,One-time,Fertilizer,OT after_15days,141.621,220.648,241.198,281.150,79.026,39.952
+7,3P10,3,UF,60,One-time,Fertilizer,OT after_15days,84.987,265.388,80.953,150.430,180.401,69.478
+8,3P11,3,UF,120,One-time,Fertilizer,OT after_15days,117.969,618.714,168.959,230.430,500.745,61.471
+9,4P9,4,MF,120,One-time,Fertilizer,OT after_15days,88.582,116.527,60.188,99.340,27.944,39.152
+10,4P10,4,UF,60,One-time,Fertilizer,OT after_15days,89.965,224.790,114.318,128.116,134.825,13.798
+11,5P8,5,MF,60,One-time,Fertilizer,OT after_15days,106.389,237.730,40.400,66.418,131.341,26.018
+12,5P11,5,UF,120,One-time,Fertilizer,OT after_15days,83.771,324.443,305.657,355.360,240.673,49.703
