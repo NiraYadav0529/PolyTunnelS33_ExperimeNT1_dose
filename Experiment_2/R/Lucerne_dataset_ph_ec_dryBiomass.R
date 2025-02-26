@@ -22,7 +22,7 @@ Lucerne_exp2 <- Lucerne_exp2 %>%
 pH_columns <- grep("^pH_", names(Lucerne_exp2), value = TRUE)
 
 pH_data <- Lucerne_exp2 %>%
-  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(pH_columns)) %>%
+ dplyr:: select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(pH_columns)) %>%
   pivot_longer(cols = starts_with("pH_"), names_to = "Date", values_to = "pH_Level") %>%
   mutate(
     Date = factor(Date),
@@ -95,6 +95,52 @@ ggplot(pH_split, aes(x = Date, y = pH_Level, fill = Dose)) +
   ) +
   geom_hline(yintercept = mean(pH_split$pH_Level[pH_split$Dose == "0"], na.rm = TRUE),
              linetype = "dashed", color = "black")
+# One-time Application Plot (Including Control) with Fertilizer Type
+ggplot(pH_one_time, aes(x = Date, y = pH_Level, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "Lucerne pH Levels Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "pH",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(pH_one_time$pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black") +
+  facet_wrap(~ Fertilizer_Type) # Facet by Fertilizer Type
+
+# One-time Application Plot (Including Control) with Clear Differentiation of Dose & Fertilizer Type
+ggplot(pH_one_time, aes(x = Date, y = pH_Level, fill = Dose, color = Fertilizer_Type)) +
+  geom_boxplot(alpha = 0.6, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  geom_jitter(aes(shape = Fertilizer_Type), alpha = 0.7, size = 1.5, position = position_dodge(width = 0.8)) + 
+  theme_minimal() +
+  labs(
+    title = "Lucerne pH Levels Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "pH",
+    fill = "Dose (kg N/ha)",
+    color = "Fertilizer Type",
+    shape = "Fertilizer Type"
+  ) +
+  scale_x_discrete(limits = pH_levels_order) +
+  scale_fill_manual(values = c("0" = "red", "30" = "green", "60" = "blue")) + # Adjust colors for Dose
+  scale_color_manual(values = c("None" = "black", "MF" = "darkgreen", "UF" = "purple")) + # Adjust colors for Fertilizer Type
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid.major.x = element_blank()
+  ) +
+  geom_hline(yintercept = mean(pH_one_time$pH_Level[pH_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+
 
 # Fit Model for Predicted Values with Control Group
 m1_pH_control <- lmer(pH_Level ~ Dose * Date * Application_Method + (1|Combined.pot.id), data = pH_data)
@@ -559,6 +605,78 @@ ggplot(biomass_split, aes(x = Date, y = log_Dry_Biomass, fill = Dose)) +
   ) +
   geom_hline(yintercept = mean(biomass_split$log_Dry_Biomass[biomass_split$Dose == "0"], na.rm = TRUE),
              linetype = "dashed", color = "black")
+
+
+# One-time Application Plot (Including Control) for EC with Fertilizer Type & Dose
+ggplot(ec_one_time, aes(x = Date, y = log_EC_Level, fill = Dose, color = Fertilizer_Type)) +
+  geom_boxplot(alpha = 0.6, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  geom_jitter(aes(shape = Fertilizer_Type), alpha = 0.7, size = 1.5, position = position_dodge(width = 0.8)) + 
+  theme_minimal() +
+  labs(
+    title = "log10(EC) Levels Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(EC)",
+    fill = "Dose (kg N/ha)",
+    color = "Fertilizer Type",
+    shape = "Fertilizer Type"
+  ) +
+  scale_x_discrete(limits = ec_levels_order) +
+  scale_fill_manual(values = c("0" = "red", "30" = "green", "60" = "blue")) + # Dose colors
+  scale_color_manual(values = c("None" = "black", "MF" = "darkgreen", "UF" = "purple")) + # Fertilizer colors
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(ec_one_time$log_EC_Level[ec_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+
+# One-time Application Plot (Including Control) for Chlorophyll Content with Fertilizer Type & Dose
+ggplot(chlorophyll_one_time, aes(x = Date, y = log_Chlorophyll_Level, fill = Dose, color = Fertilizer_Type)) +
+  geom_boxplot(alpha = 0.6, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  geom_jitter(aes(shape = Fertilizer_Type), alpha = 0.7, size = 1.5, position = position_dodge(width = 0.8)) + 
+  theme_minimal() +
+  labs(
+    title = "log10(Chlorophyll Content) Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(Chlorophyll Content)",
+    fill = "Dose (kg N/ha)",
+    color = "Fertilizer Type",
+    shape = "Fertilizer Type"
+  ) +
+  scale_x_discrete(limits = chlorophyll_levels_order) +
+  scale_fill_manual(values = c("0" = "red", "30" = "green", "60" = "blue")) + # Dose colors
+  scale_color_manual(values = c("None" = "black", "MF" = "darkgreen", "UF" = "Purple")) + # Fertilizer colors
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(chlorophyll_one_time$log_Chlorophyll_Level[chlorophyll_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
+# One-time Application Plot (Including Control) for Dry Biomass with Fertilizer Type & Dose
+ggplot(biomass_one_time, aes(x = Date, y = log_Dry_Biomass, fill = Dose, color = Fertilizer_Type)) +
+  geom_boxplot(alpha = 0.6, position = position_dodge(width = 0.8), outlier.shape = NA) +
+  geom_jitter(aes(shape = Fertilizer_Type), alpha = 0.7, size = 1.5, position = position_dodge(width = 0.8)) + 
+  theme_minimal() +
+  labs(
+    title = "log10(Dry Biomass) Over Time (One-time Application, Including Control)",
+    x = "Date",
+    y = "log10(Dry Biomass)",
+    fill = "Dose (kg N/ha)",
+    color = "Fertilizer Type",
+    shape = "Fertilizer Type"
+  ) +
+  scale_x_discrete(limits = biomass_levels_order) +
+  scale_fill_manual(values = c("0" = "red", "30" = "green", "60" = "blue")) + # Dose colors
+  scale_color_manual(values = c("None" = "black", "MF" = "darkgreen", "UF" = "purple")) + # Fertilizer colors
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  geom_hline(yintercept = mean(biomass_one_time$log_Dry_Biomass[biomass_one_time$Dose == "0"], na.rm = TRUE),
+             linetype = "dashed", color = "black")
+
 
 
 
