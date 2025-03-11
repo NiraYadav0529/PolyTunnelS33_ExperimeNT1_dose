@@ -1,0 +1,12 @@
+S.No,Sample ID,Dose,Application type,Fertilizer type,Soil wight (RL),,Hydrometer reading(RL) (GMS/ltr),Hydrometer reading(RP)(GMS/ltr),RW blank(GMS/ltr),RD blank(GMS/ltr),DP%
+1,L1,0,split,None,25,25,2,15,0,12,0.667
+3,L2,10,split,UF,25,25,2,16,0,12,0.500
+4,L3,20,split,UF,25,25,2,16,0,12,0.500
+5,L4,30,split,UF,25,25,2,16,0,12,0.500
+7,L5,40,split,UF,25,25,2,16,0,12,0.500
+8,L6,50,split,UF,25,25,1,16,0,12,0.250
+9,L7,60,split,UF,25,25,2,17,0,12,0.400
+11,L8 ,30,OneTime,MF,25,25,2,17,0,12,0.400
+12,L9,60,OneTime,MF,25,25,1,11,0,12,0.000
+13,L10,30,OneTime,UF,25,25,2,16,0,12,0.500
+15,L11,60,OneTime,UF,25,25,1,17,0,12,0.200

@@ -196,6 +196,17 @@ head(Fertilizers_exp2)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+# Reshape data for plotting
+fertilizer_data <- Fertilizers_exp2 %>%
+  select(Dose, 
+         `pH..August.2024.`, `EC..August.2024._.mS.cm.`, 
+         `pH..Feb.2025.`, `EC..Feb.2025.`) %>%
+  pivot_longer(cols = -Dose, names_to = "Parameter", values_to = "Value") %>%
+  separate(Parameter, into = c("Measure", "Date"), sep = "_") %>%
+  mutate(Date = ifelse(Date == "August", "August 2024", "February 2025"))
+
+# Check the reshaped data
+head(fertilizer_data)
 
 # Reshape data for plotting
 fertilizer_data <- Fertilizers_exp2 %>%
@@ -286,5 +297,231 @@ p2 <- ggplot(fertilizer_data %>% filter(Measure == "EC"), aes(x = Dose, y = Valu
 print(p1)
 
 # Display EC plot
+print(p2)
+
+
+
+###For lucerne
+
+# Calculate Root-to-Shoot Ratio
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(Root_to_Shoot_Ratio = Dry_Biomass_root_118days / Dry_Biomass_shoot_4)
+colnames(Lucerne_exp2)
+# Check the new column
+
+# Convert categorical variables to factors
+Lucerne_exp2 <- Lucerne_exp2 %>%
+  mutate(
+    Dose = factor(Dose...N.kg.ha., levels = c("0", "10", "20", "30", "40", "50", "60")),
+    Fertilizer_Type = factor(Fertilizer.type, levels = c("None", "MF", "UF")),
+    Application_Method = factor(Application_method, levels = c("One-time", "Split"))
+  )
+head(Lucerne_exp2$Root_to_Shoot_Ratio)
+# Boxplot for Root-to-Shoot Ratio by Fertilizer Type
+ggplot(Lucerne_exp2, aes(x = Fertilizer.type, y = Root_to_Shoot_Ratio, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "Root-to-Shoot Ratio by Fertilizer Type",
+    x = "Fertilizer Type",
+    y = "Root-to-Shoot Ratio",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Boxplot for Root-to-Shoot Ratio by Application Method
+ggplot(Lucerne_exp2, aes(x = Application_Method, y = Root_to_Shoot_Ratio, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "Root-to-Shoot Ratio by Application Method",
+    x = "Application Method",
+    y = "Root-to-Shoot Ratio",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Fit Linear Mixed-Effects Model for Root-to-Shoot Ratio
+m1_root_shoot <- lmer(Root_to_Shoot_Ratio ~ Dose * Fertilizer_Type * Application_Method + (1|Combined.pot.id), data = Lucerne_exp2)
+
+# Model Diagnostics
+plot(m1_root_shoot)  # Check residuals
+qqPlot(resid(m1_root_shoot))  # Check normality of residuals
+
+# ANOVA for Fixed Effects
+Anova(m1_root_shoot, test = "F")
+
+# Summary of the Model
+summary(m1_root_shoot)
+
+
+
+# Dose-Response Curve for Root-to-Shoot Ratio
+ggplot(Lucerne_exp2, aes(x = as.numeric(as.character(Dose)), y = Root_to_Shoot_Ratio, color = Fertilizer_Type)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1) +
+  facet_wrap(~Application_Method) +
+  theme_minimal() +
+  labs(
+    title = "Dose-Response Curve for Root-to-Shoot Ratio",
+    x = "Nitrogen Dose (kg/ha)",
+    y = "Root-to-Shoot Ratio",
+    color = "Fertilizer Type"
+  ) +
+  theme(legend.position = "right")
+
+# Factorial ANOVA for Root-to-Shoot Ratio
+anova_root_shoot <- aov(Root_to_Shoot_Ratio ~ Dose * Fertilizer_Type * Application_Method, data = Lucerne_exp2)
+
+# Summary of ANOVA
+summary(anova_root_shoot)
+
+
+# Correlation Matrix
+correlation_data <- Lucerne_exp2 %>%
+  select(Root_to_Shoot_Ratio, pH_8_atHarvestDay, EC._atHarvestDay, Cholorphyll_content.HarvestDay., Dry_Biomass_shoot_4, Dry_Biomass_root_118days)
+
+# Calculate Correlation Matrix
+cor_matrix <- cor(correlation_data, use = "complete.obs")
+
+# Visualize Correlation Matrix
+corrplot(cor_matrix, method = "circle", type = "upper", tl.col = "black", tl.srt = 45)
+
+
+# Generate Predicted Values
+predicted_root_shoot <- ggpredict(m1_root_shoot, terms = c("Dose", "Fertilizer_Type", "Application_Method"))
+
+# Convert to Data Frame
+predicted_root_shoot_df <- as.data.frame(predicted_root_shoot)
+
+# Plot Predicted Root-to-Shoot Ratio
+ggplot(predicted_root_shoot_df, aes(x = x, y = predicted, group = group, color = group)) +
+  geom_point(size = 3) +
+  geom_line(linewidth = 1) +
+  facet_wrap(~facet, ncol = 1) +
+  theme_minimal() +
+  labs(
+    title = "Predicted Root-to-Shoot Ratio",
+    x = "Nitrogen Dose (kg/ha)",
+    y = "Predicted Root-to-Shoot Ratio",
+    color = "Fertilizer Type"
+  ) +
+  theme(legend.position = "right")
+
+
+
+
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(car)
+library(ggpubr)
+library(corrplot)
+library(ggeffects)
+
+# Convert categorical variables to factors
+Phalaris_exp2 <- Phalaris_exp2 %>%
+  mutate(
+    Dose = factor(Dose_.N.kg.ha., levels = c("0", "20", "40", "60", "80", "100", "120")),
+    Fertilizer_Type = factor(Fertilizer_type, levels = c("None", "MF", "UF")),
+    Application_Method = factor(Application_method, levels = c("One-time", "Split")),
+    Treatment_Type = factor(Treatment_Type, levels = c("Control", "Other"))
+  )
+
+# Boxplot: Root-to-Shoot Ratio by Fertilizer Type
+ggplot(Phalaris_exp2, aes(x = Fertilizer_Type, y = Root.shoot.Ratio, fill = Dose)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(aes(color = Dose), width = 0.2, alpha = 0.5, size = 1.5) +
+  theme_minimal() +
+  labs(
+    title = "Root-to-Shoot Ratio by Fertilizer Type",
+    x = "Fertilizer Type",
+    y = "Root-to-Shoot Ratio",
+    fill = "Dose",
+    color = "Dose"
+  ) +
+  theme(legend.position = "right", axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Fit Linear Mixed-Effects Model for Root-to-Shoot Ratio
+m1_root_shoot_phalaris <- lmer(Root.shoot.Ratio ~ Dose * Fertilizer_Type * Application_Method + (1|Combined.pot.id), data = Phalaris_exp2)
+
+# Model Diagnostics
+plot(m1_root_shoot_phalaris)  # Check residuals
+qqPlot(resid(m1_root_shoot_phalaris))  # Check normality of residuals
+
+# ANOVA for Fixed Effects
+Anova(m1_root_shoot_phalaris, test = "F")
+
+# Summary of the Model
+summary(m1_root_shoot_phalaris)
+
+# Dose-Response Curve for Root-to-Shoot Ratio
+ggplot(Phalaris_exp2, aes(x = as.numeric(as.character(Dose)), y = Root.shoot.Ratio, color = Fertilizer_Type)) +
+  geom_point(size = 3, alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 1) +
+  facet_wrap(~Application_Method) +
+  theme_minimal() +
+  labs(
+    title = "Dose-Response Curve for Root-to-Shoot Ratio",
+    x = "Nitrogen Dose (kg/ha)",
+    y = "Root-to-Shoot Ratio",
+    color = "Fertilizer Type"
+  ) +
+  theme(legend.position = "right")
+
+# Correlation Matrix
+correlation_data_phalaris <- Phalaris_exp2 %>%
+  select(Root.shoot.Ratio, pH_8, EC_8, CholorophyllContent_125daysHD, Dry_shoot_..Biomass.g._125daysHD, Dry_root_biomass.g._125daysHD)
+
+# Calculate Correlation Matrix
+cor_matrix_phalaris <- cor(correlation_data_phalaris, use = "complete.obs")
+
+# Visualize Correlation Matrix
+corrplot(cor_matrix_phalaris, method = "circle", type = "upper", tl.col = "black", tl.srt = 45)
+
+
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Reshape data for plotting
+fertilizer_data <- Fertilizers_exp2 %>%
+  pivot_longer(cols = -Dose, names_to = "Parameter", values_to = "Value") %>%
+  separate(Parameter, into = c("Measure", "Date", "Unit"), sep = "_", fill = "right") %>%
+  mutate(Date = paste(Date, "2024"),  
+         Date = gsub("Feb 2024", "February 2025", Date),
+         Unit = ifelse(is.na(Unit), "", Unit))  
+
+# Extract numeric part of Dose for proper sorting
+fertilizer_data <- fertilizer_data %>%
+  mutate(Dose_numeric = as.numeric(gsub("[^0-9]", "", Dose))) %>%  # Extract numbers from Dose
+  arrange(Dose_numeric) %>%  # Arrange by numeric Dose values
+  mutate(Dose = factor(Dose, levels = unique(Dose)))  # Set as ordered factor
+
+# Histogram-style bar plot for pH
+p1 <- ggplot(subset(fertilizer_data, Measure == "pH"), aes(x = Dose, y = Value, fill = Date)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +  
+  geom_text(aes(label = ifelse(is.na(Value), "NA", round(Value, 2))), vjust = -0.5, color = "red") +  
+  labs(title = "pH Levels Across Fertilizer Doses", x = "Fertilizer Dose", y = "pH Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("black", "white"))
+
+# Histogram-style bar plot for EC
+p2 <- ggplot(subset(fertilizer_data, Measure == "EC"), aes(x = Dose, y = Value, fill = Date)) +
+  geom_bar(stat = "identity", position = "dodge", color = "black") +  
+  geom_text(aes(label = ifelse(is.na(Value), "NA", round(Value, 3))), vjust = -0.5, color = "red") +  
+  labs(title = "EC Levels Across Fertilizer Doses", x = "Fertilizer Dose", y = "EC Value (mS/cm)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("black", "white"))
+
+# Print plots
+print(p1)
 print(p2)
 
