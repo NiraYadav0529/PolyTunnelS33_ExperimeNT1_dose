@@ -5,6 +5,9 @@ Phalaris_MBC <- read.csv("MB(CN)_Phalaris.csv", check.names = TRUE)
 head(Lucerne_MBC)
 head(Phalaris_MBC)
 
+
+colnames(Lucerne_MBC)
+colnames(Phalaris_MBC)
 # Load required libraries
 library(tidyverse)
 library(lme4)

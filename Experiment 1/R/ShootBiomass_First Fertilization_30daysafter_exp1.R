@@ -86,12 +86,6 @@ ggplot(biomass_summary_shoot, aes(x = Dose, y = Mean_Shoot, fill = Fertilizer_Ty
 
 
 
-# Load necessary libraries
-library(dplyr)
-library(ggplot2)
-library(emmeans)
-library(multcompView)
-
 # Load the dataset (assuming you have already loaded the CSV file)
 colnames(Plant_traits)
 

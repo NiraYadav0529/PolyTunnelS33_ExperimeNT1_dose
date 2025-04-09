@@ -5,7 +5,10 @@ library(car)
 library(emmeans)
 library(multcomp)
 
-# Load the dataset
+
+setwd("C:\\Users\\90958427\\OneDrive - Western Sydney University\\PolyTunnelS33_ExperimeNT1_dose\\Experiment 1\\Modified Data File")
+
+# Lotad the dataset
 # Plant_traits <- read.csv("Biomass_height_stem_data_exp1.csv")
 colnames(Plant_traits)
 # Ensure necessary columns are treated as factors

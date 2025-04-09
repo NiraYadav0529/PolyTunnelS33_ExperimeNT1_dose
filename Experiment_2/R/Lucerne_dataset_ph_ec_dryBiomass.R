@@ -189,7 +189,7 @@ colnames(Lucerne_exp2)
 ec_columns <- grep("^EC_", names(Lucerne_exp2), value = TRUE)
 
 ec_data <- Lucerne_exp2 %>%
-  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(ec_columns)) %>%
+  dplyr::select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(ec_columns)) %>%
   pivot_longer(cols = starts_with("EC_"), names_to = "Date", values_to = "EC_Level") %>%
   mutate(
     Date = factor(Date),
@@ -280,7 +280,7 @@ ggplot(predicted_EC_df, aes(x = x, y = predicted, group = group, color = group))
   )
 
 
-
+colnames(Lucerne_exp2)
 ##For cholorphyll content data of Lucerne 
 #Data Preprocessing for Chlorophyll Content
 ##Extract and Reshape Chlorophyll-related Columns
@@ -288,7 +288,7 @@ ggplot(predicted_EC_df, aes(x = x, y = predicted, group = group, color = group))
 chlorophyll_columns <- grep("Cholorphyll_content", names(Lucerne_exp2), value = TRUE)
 
 chlorophyll_data <- Lucerne_exp2 %>%
-  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(chlorophyll_columns)) %>%
+ dplyr:: select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(chlorophyll_columns)) %>%
   pivot_longer(cols = starts_with("Cholorphyll_content"), names_to = "Date", values_to = "Chlorophyll_Level") %>%
   mutate(Date = factor(Date), Combined.pot.id = as.character(Combined.pot.id)) %>%
   drop_na(Chlorophyll_Level)
@@ -383,7 +383,7 @@ ggplot(predicted_chlorophyll_df, aes(x = x, y = predicted, group = group, color 
 biomass_columns <- grep("Dry_Biomass", names(Lucerne_exp2), value = TRUE)
 
 biomass_data <- Lucerne_exp2 %>%
-  select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(biomass_columns)) %>%
+ dplyr:: select(Combined.pot.id, Dose, Fertilizer_Type, Application_Method, all_of(biomass_columns)) %>%
   pivot_longer(cols = starts_with("Dry_Biomass"), names_to = "Date", values_to = "Dry_Biomass") %>%
   mutate(Date = factor(Date), Combined.pot.id = as.character(Combined.pot.id)) %>%
   drop_na(Dry_Biomass)
